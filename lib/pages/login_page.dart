@@ -100,87 +100,115 @@ class _LoginPageState extends State<LoginPage>
                             fit: BoxFit.contain,
                           ),
 
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 50),
+                          SizedBox(
+                            width: 300,
+                            child: Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withAlpha(240).withOpacity(0.8),
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Colors.black26,
+                                    blurRadius: 25,
+                                    offset: Offset(0, 12),
+                                  ),
+                                ],
+                                border: Border.all(color: Colors.white24),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "Sign In",
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  // email
+                                  TextField(
+                                    controller: _emailController,
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 20,
+                                    ),
+                                    decoration: InputDecoration(
+                                      labelText: "Email",
+                                      labelStyle: TextStyle(
+                                        color: Colors.black87,
+                                      ),
+                                      enabledBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.black54,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      focusedBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.yellow.shade700,
+                                          width: 2,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 15),
 
-                          //email
-                          Center(
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 360),
-                              child: TextField(
-                                controller: _emailController,
-                                style: const TextStyle(color: Colors.black),
-                                decoration: InputDecoration(
-                                  labelText: "Email",
-                                  labelStyle: TextStyle(color: Colors.white),
-                                  enabledBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Colors.white70,
-                                      width: 2,
+                                  // password
+                                  TextField(
+                                    controller: _passwordController,
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 20,
+                                    ),
+                                    decoration: InputDecoration(
+                                      labelText: "Password",
+                                      labelStyle: TextStyle(
+                                        color: Colors.black87,
+                                      ),
+                                      enabledBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.black87,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      focusedBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.yellow.shade700,
+                                          width: 2,
+                                        ),
+                                      ),
+                                    ),
+                                    obscureText: true,
+                                  ),
+                                  const SizedBox(height: 15),
+
+                                  // login button
+                                  SizedBox(
+                                    width: 150,
+                                    child: ElevatedButton(
+                                      onPressed: login,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            Colors.white.withAlpha(240).withOpacity(0.8), // button color
+                                        foregroundColor:
+                                            Colors.black87, // text color
+                                        minimumSize: const Size.fromHeight(
+                                          48,
+                                        ), // button size
+                                        side: const BorderSide(
+                                          color: Colors.black87,
+                                          width: 1,
+                                        )
+                                      ),
+                                      child: const Text("Login"),
                                     ),
                                   ),
-                                  focusedBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Colors.red.shade800,
-                                      width: 2,
-                                    ),
-                                  ),
-                                ),
+                                ],
                               ),
                             ),
                           ),
-
-                          const SizedBox(height: 5),
-
-                          // password
-                          Center(
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 360),
-                              child: TextField(
-                                controller: _passwordController,
-                                style: const TextStyle(color: Colors.black),
-                                decoration: InputDecoration(
-                                  labelText: "Password",
-                                  labelStyle: TextStyle(color: Colors.white),
-                                  enabledBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Colors.white70,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  focusedBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Colors.red.shade800,
-                                      width: 2,
-                                    ),
-                                  ),
-                                ),
-                                obscureText: true,
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 15),
-
-                          // login button
-                          Center(
-                            child: SizedBox(
-                              width: 150,
-                              child: ElevatedButton(
-                                onPressed: login,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white, // button color
-                                  foregroundColor:
-                                      Colors.red.shade500, // text color
-                                  minimumSize: const Size.fromHeight(
-                                    48,
-                                  ), // button size
-                                ),
-                                child: const Text("Login"),
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 12),
                         ],
                       ),
                     ),

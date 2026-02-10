@@ -17,32 +17,30 @@ class _MainShellState extends State<MainShell> {
     await authService.signOut();
   }
 
-  final List<Widget> pages = const [
-
-  ];
+  final List<Widget> pages = const [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 70,
+        toolbarHeight: 90,
+        backgroundColor: Colors.red.shade500,
         elevation: 0,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(0), 
-          child: Container(
-            height: 1,
-            color: Colors.grey.shade300,
-          )),
+          preferredSize: const Size.fromHeight(0),
+          child: Container(height: 2, color: Colors.black54),
+        ),
         title: Padding(
-          padding: const EdgeInsets.only(top: 10.0),
+          padding: const EdgeInsets.only(),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
                 'lib/assets/images/popcom logo.png',
-                height: 60,
+                height: 100,
                 fit: BoxFit.contain,
               ),
+              const SizedBox(height: 15),
             ],
           ),
         ),
@@ -50,7 +48,15 @@ class _MainShellState extends State<MainShell> {
         centerTitle: true,
         actions: [
           // logout button
-          IconButton(onPressed: logout, icon: const Icon(Icons.logout)),
+          IconButton(
+            onPressed: logout,
+            icon: const Icon(Icons.logout),
+            style: IconButton.styleFrom(
+              foregroundColor: Colors.white,
+              iconSize: 35,
+              padding: EdgeInsets.only(bottom: 10, right: 5),
+            ),
+          ),
         ],
       ),
       body: AnimatedSwitcher(
