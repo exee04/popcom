@@ -50,7 +50,7 @@ class _MainShellState extends State<MainShell> {
           // logout button
           IconButton(
             onPressed: logout,
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.menu),
             style: IconButton.styleFrom(
               foregroundColor: Colors.white,
               iconSize: 35,

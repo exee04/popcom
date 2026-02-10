@@ -169,7 +169,7 @@ class _LoginPageState extends State<LoginPage>
                                       ),
                                       enabledBorder: UnderlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: Colors.black87,
+                                          color: Colors.black54,
                                           width: 2,
                                         ),
                                       ),
