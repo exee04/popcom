@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:popcom/auth/auth_service.dart';
 
-enum AppPage { home, records, appointments }
-
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
@@ -18,8 +16,6 @@ class _MainShellState extends State<MainShell> {
   void logout() async {
     await authService.signOut();
   }
-
-  AppPage currentPage = AppPage.home;
 
   final List<Widget> pages = const [
 
@@ -43,7 +39,7 @@ class _MainShellState extends State<MainShell> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
-                'lib/assets/images/zealcare.png',
+                'lib/assets/images/popcom logo.png',
                 height: 60,
                 fit: BoxFit.contain,
               ),
@@ -68,34 +64,7 @@ class _MainShellState extends State<MainShell> {
             child: FadeTransition(opacity: animation, child: child),
           );
         },
-        child: pages[currentPage.index],
       ),
-      bottomNavigationBar: BottomAppBar(
-        height: 50,
-        color: Colors.teal,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _navIcon(Icons.home, AppPage.home),
-            _navIcon(Icons.table_view, AppPage.records),
-            _navIcon(Icons.calendar_month, AppPage.appointments),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _navIcon(IconData icon, AppPage page) {
-    final isActive = currentPage == page;
-
-    return IconButton(
-      padding: EdgeInsets.zero,
-      icon: Icon(icon, color: isActive ? Colors.white : Colors.white70),
-      onPressed: isActive
-          ? null
-          : () {
-              setState(() => currentPage = page);
-            },
     );
   }
 }
