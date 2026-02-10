@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:popcom/auth/auth_service.dart';
-import 'package:popcom/pages/home_page.dart';
 
 enum AppPage { home, records, appointments }
 
@@ -23,9 +22,7 @@ class _MainShellState extends State<MainShell> {
   AppPage currentPage = AppPage.home;
 
   final List<Widget> pages = const [
-    HomePage(key: ValueKey('home')),
-    RecordsPage(key: ValueKey('records')),
-    AppointmentsPage(key: ValueKey('appointments')),
+
   ];
 
   @override

@@ -54,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     //logo
                     Image.asset(
-                      'lib/assets/images/zealcare.png',
+                      'lib/assets/images/popcom logo.png',
                       height: 120,
                       fit: BoxFit.contain,
                     ),
@@ -68,12 +68,12 @@ class _LoginPageState extends State<LoginPage> {
                         child: TextField(
                           controller: _emailController,
                           style: const TextStyle(color: Colors.black),
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: "Email",
-                            labelStyle: TextStyle(color: Colors.teal),
+                            labelStyle: TextStyle(color: Colors.orange[400]),
                             focusedBorder: UnderlineInputBorder(
                               borderSide: BorderSide(
-                                color: Colors.teal,
+                                color: Colors.red.shade600,
                                 width: 2,
                               ),
                             ),
@@ -91,12 +91,12 @@ class _LoginPageState extends State<LoginPage> {
                         child: TextField(
                           controller: _passwordController,
                           style: const TextStyle(color: Colors.black),
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: "Password",
-                            labelStyle: TextStyle(color: Colors.teal),
+                            labelStyle: TextStyle(color: Colors.orange[400]),
                             focusedBorder: UnderlineInputBorder(
                               borderSide: BorderSide(
-                                color: Colors.teal,
+                                color: Colors.red.shade600,
                                 width: 2,
                               ),
                             ),
@@ -115,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: ElevatedButton(
                           onPressed: login,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal, // button color
+                            backgroundColor: Colors.red.shade600, // button color
                             foregroundColor: Colors.white, // text color
                             minimumSize: const Size.fromHeight(
                               48,
