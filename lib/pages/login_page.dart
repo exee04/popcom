@@ -49,8 +49,6 @@ class _LoginPageState extends State<LoginPage>
   // login button pressed
   Future<void> submit() async {
     if (_loading) return;
-
-    setState(() => _loading = true);
     // prepare data
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
@@ -60,6 +58,7 @@ class _LoginPageState extends State<LoginPage>
       _showSnack("Please fill all fields");
       return;
     }
+    setState(() => _loading = true);
 
     try {
       // attempt sign in
@@ -73,10 +72,9 @@ class _LoginPageState extends State<LoginPage>
         _showSnack("Successfully logged in.");
       }
     } catch (e) {
-      if(_isSignUp) {
-      _showSnack("Error in signing up. \n ${e.toString()}");
-      }
-      else {
+      if (_isSignUp) {
+        _showSnack("Error in signing up. \n ${e.toString()}");
+      } else {
         _showSnack("Error in signing in. \n${e.toString()}");
       }
     } finally {
@@ -174,6 +172,7 @@ class _LoginPageState extends State<LoginPage>
                                       }),
                                     ],
                                   ),
+                                  const SizedBox(height: 20),
                                   // email
                                   TextField(
                                     controller: _emailController,
@@ -294,19 +293,19 @@ class _LoginPageState extends State<LoginPage>
                                     ),
                                     obscureText: _obscurePassword,
                                   ),
-                                  const SizedBox(height: 15),
+                                  const SizedBox(height: 20),
 
                                   if (!_isSignUp) ...[
                                     Text(
                                       "Forgot password?",
                                       style: TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.black54.withAlpha(85),
+                                        fontSize: 17,
+                                        color: Colors.black54.withAlpha(95),
                                       ),
                                     ),
                                   ],
 
-                                  const SizedBox(height: 15),
+                                  const SizedBox(height: 25),
                                   // login button
                                   SizedBox(
                                     width: 150,
