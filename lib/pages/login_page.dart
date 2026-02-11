@@ -9,12 +9,13 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-bool _obscurePassword = true;
-
 class _LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
   // get auth service
   final authService = AuthService();
+
+  bool _obscurePassword = true;
+  bool _loading = false;
 
   // text controllers
   final _emailController = TextEditingController();
@@ -38,33 +39,56 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   void dispose() {
+    _emailController.dispose();
+    _usernameController.dispose();
+    _passwordController.dispose();
     _controller.dispose();
     super.dispose();
   }
 
   // login button pressed
-  void submit() async {
-    // prepare data
-    final email = _emailController.text;
-    final password = _passwordController.text;
-    final username = _usernameController.text;
+  Future<void> submit() async {
+    if (_loading) return;
 
-    // attempt login..
+    setState(() => _loading = true);
+    // prepare data
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final username = _usernameController.text.trim();
+
+    if (email.isEmpty || password.isEmpty || (_isSignUp && username.isEmpty)) {
+      _showSnack("Please fill all fields");
+      return;
+    }
+
     try {
+      // attempt sign in
       if (_isSignUp) {
-        await authService.signUpWithEmailPassword(email, password );
-      } else {
+        await authService.signUpWithEmailPassword(email, password, username);
+        _showSnack("Check your email to confirm.");
+      }
+      // attempt sign up
+      else {
         await authService.signInWithEmailPassword(email, password);
+        _showSnack("Successfully logged in.");
       }
-    }
-    // catch any errors
-    catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    } catch (e) {
+      if(_isSignUp) {
+      _showSnack("Error in signing up. \n ${e.toString()}");
       }
+      else {
+        _showSnack("Error in signing in. \n${e.toString()}");
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
+  }
+
+  void _showSnack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   // UI
@@ -134,84 +158,20 @@ class _LoginPageState extends State<LoginPage>
                                 children: [
                                   Row(
                                     children: [
-                                      // sign in
-                                      Expanded(
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              _isSignUp = false;
-                                              _emailController.clear();
-                                              _passwordController.clear();
-                                            });
-                                          },
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                "Sign In",
-                                                style: TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight: !_isSignUp
-                                                      ? FontWeight.bold
-                                                      : FontWeight.normal,
-                                                  color: !_isSignUp
-                                                      ? Colors.black87
-                                                      : Colors.black45,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 6),
-                                              AnimatedContainer(
-                                                duration: const Duration(
-                                                  milliseconds: 250,
-                                                ),
-                                                height: 2,
-                                                width: !_isSignUp ? 55 : 0,
-                                                color: Colors.black87,
-                                              ),
-                                              const SizedBox(height: 20),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      // register
-                                      Expanded(
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              _isSignUp = true;
-                                              _emailController.clear();
-                                              _passwordController.clear();
-                                            });
-                                          },
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                "Sign Up",
-                                                style: TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight: _isSignUp
-                                                      ? FontWeight.bold
-                                                      : FontWeight.normal,
-                                                  color: _isSignUp
-                                                      ? Colors.black87
-                                                      : Colors.black45,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 6),
-                                              AnimatedContainer(
-                                                duration: const Duration(
-                                                  milliseconds: 250,
-                                                ),
-                                                height: 2,
-                                                width: _isSignUp ? 55 : 0,
-                                                color: Colors.black87,
-                                              ),
-                                              const SizedBox(height: 20),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
+                                      _buildTab("Sign In", !_isSignUp, () {
+                                        setState(() {
+                                          _isSignUp = false;
+                                          _emailController.clear();
+                                          _passwordController.clear();
+                                        });
+                                      }),
+                                      _buildTab("Sign Up", _isSignUp, () {
+                                        setState(() {
+                                          _isSignUp = true;
+                                          _emailController.clear();
+                                          _passwordController.clear();
+                                        });
+                                      }),
                                     ],
                                   ),
                                   // email
@@ -336,23 +296,22 @@ class _LoginPageState extends State<LoginPage>
                                   ),
                                   const SizedBox(height: 15),
 
-                                  if (!_isSignUp)
-                                    ...[
-                                      Text(
-                                        "Forgot password?",
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          color: Colors.black54.withAlpha(85),
-                                        ),
+                                  if (!_isSignUp) ...[
+                                    Text(
+                                      "Forgot password?",
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.black54.withAlpha(85),
                                       ),
-                                    ],
+                                    ),
+                                  ],
 
                                   const SizedBox(height: 15),
                                   // login button
                                   SizedBox(
                                     width: 150,
                                     child: ElevatedButton(
-                                      onPressed: submit,
+                                      onPressed: _loading ? null : submit,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.white
                                             .withAlpha(240)
@@ -367,8 +326,27 @@ class _LoginPageState extends State<LoginPage>
                                           width: 1,
                                         ),
                                       ),
-                                      child: Text(
-                                        _isSignUp ? "Sign Up" : "Login",
+                                      child: AnimatedSwitcher(
+                                        duration: const Duration(
+                                          milliseconds: 200,
+                                        ),
+                                        child: _loading
+                                            ? const SizedBox(
+                                                key: ValueKey("loading"),
+                                                height: 22,
+                                                width: 22,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      color: Colors.black87,
+                                                    ),
+                                              )
+                                            : Text(
+                                                key: const ValueKey("text"),
+                                                _isSignUp
+                                                    ? "Sign Up"
+                                                    : "Sign In",
+                                              ),
                                       ),
                                     ),
                                   ),
@@ -379,7 +357,9 @@ class _LoginPageState extends State<LoginPage>
                                       children: const [
                                         Expanded(child: Divider()),
                                         Padding(
-                                          padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
+                                          padding: EdgeInsetsGeometry.symmetric(
+                                            horizontal: 10,
+                                          ),
                                           child: Text("or"),
                                         ),
                                         Expanded(child: Divider()),
@@ -391,15 +371,20 @@ class _LoginPageState extends State<LoginPage>
                                       onPressed: () {
                                         // insert google sign up function here
                                       },
-                                      icon: Image.asset('lib/assets/images/google logo.png', height: 20,),
+                                      icon: Image.asset(
+                                        'lib/assets/images/google logo.png',
+                                        height: 20,
+                                      ),
                                       label: const Text("Sign Up with Google"),
                                       style: OutlinedButton.styleFrom(
                                         foregroundColor: Colors.black87,
                                         minimumSize: const Size.fromHeight(48),
-                                        side: const BorderSide(color: Colors.transparent),
+                                        side: const BorderSide(
+                                          color: Colors.transparent,
+                                        ),
                                       ),
-                                    )
-                                  ]
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
@@ -416,4 +401,29 @@ class _LoginPageState extends State<LoginPage>
       ),
     );
   }
+}
+
+Widget _buildTab(String text, bool isActive, VoidCallback onTap) {
+  return Expanded(
+    child: GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            height: 2,
+            width: isActive ? 55 : 0,
+            color: Colors.black87,
+          ),
+        ],
+      ),
+    ),
+  );
 }
