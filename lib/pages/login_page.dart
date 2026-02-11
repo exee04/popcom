@@ -460,9 +460,9 @@ class _LoginPageState extends State<LoginPage>
                                           ),
                                         ),
                                         Positioned(
-                                          bottom: 1,
-                                          left: 0,
-                                          right: 0,
+                                          bottom: 0,
+                                          left: 1,
+                                          right: 1,
                                           height: rs(context, 6),
                                           child: Container(
                                             decoration: BoxDecoration(
@@ -573,28 +573,28 @@ Widget _buildTab(
       child: Stack(
         children: [
           Container(
-            height: rs(context, 50),
+            height: rs(context, 40),
             decoration: BoxDecoration(
               color: isActive
-                  ? const Color(0xFFE61A4B)
+                  ? const Color(0xFFE61A4B).withAlpha(240).withOpacity(0.8)
                   : Colors.white.withOpacity(0.8),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.black87, width: 1),
+              border: Border.all(color: Colors.black26, width: 1),
             ),
             alignment: Alignment.center,
             child: Text(
               text,
               style: TextStyle(
-                color: isActive ? Colors.yellow.shade500 : Colors.black87,
+                color: isActive ? Colors.yellow.shade500 : Colors.black87.withOpacity(0.70),
                 fontWeight: FontWeight.bold,
-                fontSize: rs(context, 18),
+                fontSize: rs(context, 15),
               ),
             ),
           ),
           Positioned(
-            bottom: 1,
-            left: 0,
-            right: 0,
+            bottom: 0,
+            left: 1,
+            right: 2,
             height: rs(context, 6),
             child: Container(
               decoration: BoxDecoration(
