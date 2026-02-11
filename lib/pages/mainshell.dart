@@ -47,7 +47,7 @@ class _MainShellState extends State<MainShell> {
 
         centerTitle: true,
         actions: [
-          // logout button
+          // menu button
           IconButton(
             onPressed: logout,
             icon: const Icon(Icons.menu),
