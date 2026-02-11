@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:popcom/auth/auth_service.dart';
 import 'dart:math';
 
+import 'package:popcom/pages/register_page.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -35,6 +37,13 @@ class _LoginPageState extends State<LoginPage>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void register(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const RegisterPage()),
+    );
   }
 
   // login button pressed
@@ -179,7 +188,23 @@ class _LoginPageState extends State<LoginPage>
                               ),
                             ),
                           ),
-
+                          Center(
+                            child: SizedBox(
+                              width: 150,
+                              child: ElevatedButton(
+                                onPressed: () => register(context),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white, // button color
+                                  foregroundColor:
+                                      Colors.red.shade500, // text color
+                                  minimumSize: const Size.fromHeight(
+                                    48,
+                                  ), // button size
+                                ),
+                                child: const Text("Register"),
+                              ),
+                            ),
+                          ),
                           const SizedBox(height: 12),
                         ],
                       ),
