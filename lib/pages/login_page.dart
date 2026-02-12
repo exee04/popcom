@@ -72,12 +72,24 @@ class _LoginPageState extends State<LoginPage>
     try {
       // attempt sign in
       if (_isSignUp) {
-        await authService.signUpWithEmailPassword(email, password, username);
+        await authService.signUpWithEmailPassword(
+          email,
+          password,
+          username,
+          lastname,
+          firstname,
+        );
         _showSnack("Check your email to confirm.");
       }
       // attempt sign up
       else {
-        await authService.signInWithEmailPassword(email, password);
+        await authService.signUpWithEmailPassword(
+          email,
+          password,
+          username,
+          lastname,
+          firstname,
+        );
         _showSnack("Successfully logged in.");
       }
     } catch (e) {

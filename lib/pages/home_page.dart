@@ -106,7 +106,7 @@ class _HomePageState extends State<HomePage> {
               ),
 
               const SizedBox(height: 16),
-              Expanded(child: _isGrid ? _buildGridView() : _buildListView()),
+              //Expanded(child: _isGrid ? _buildGridView() : _buildListView()),
             ],
           ),
         ],
@@ -137,24 +137,25 @@ Widget _actionButton({required IconData icon, required VoidCallback onTap}) {
     },
   );
 }
+
 // grid view widget
-Widget _buildGridView() {
-  return GridView.builder(
-    itemCount: 10,
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 2,
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: 0.8,
-    ),
-    itemBuilder: (context, index) {
-      return _buildGlassCard(index);
-    },
-  );
-}
+//Widget _buildGridView() {
+// return GridView.builder(
+//    itemCount: 10,
+//    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+//      crossAxisCount: 2,
+//      crossAxisSpacing: 12,
+//      mainAxisSpacing: 12,
+//      childAspectRatio: 0.8,
+//    ),
+//    itemBuilder: (context, index) {
+//      return _buildGlassCard(index);
+//    },
+//  );
+//}
 
 // list view widget
-Widget _buildListView() {
-  return ListView.separated(itemCount: 10,
-  separatorBuilder: (_,),)
-}
+// Widget _buildListView() {
+//  return ListView.separated(itemCount: 10,
+//  separatorBuilder: (_,),)
+//}
