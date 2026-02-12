@@ -65,6 +65,7 @@ flutter:
   assets:
    - lib/assets/images/popcom logo.png
    - lib/assets/images/google logo.png
+   - lib/assets/images/popcom logo with text.png
    - .env
 
   # To add assets to your application, add an assets section, like this:

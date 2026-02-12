@@ -23,6 +23,8 @@ class _LoginPageState extends State<LoginPage>
   bool _loading = false;
 
   // text controllers
+  final _lastNameController = TextEditingController();
+  final _firstNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -55,6 +57,8 @@ class _LoginPageState extends State<LoginPage>
   Future<void> submit() async {
     if (_loading) return;
     // prepare data
+    final lastname = _lastNameController.text.trim();
+    final firstname = _firstNameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final username = _usernameController.text.trim();
@@ -206,6 +210,120 @@ class _LoginPageState extends State<LoginPage>
                                         MediaQuery.of(context).size.height *
                                         0.03,
                                   ),
+                                  // last name
+                                  if (_isSignUp) ...[
+                                    SizedBox(
+                                      height: rs(context, 45),
+                                      child: TextField(
+                                        controller: _lastNameController,
+                                        style: TextStyle(
+                                          color: Colors.black87,
+                                          fontSize: rs(context, 18),
+                                        ),
+                                        decoration: InputDecoration(
+                                          labelText: null,
+                                          hintText: "Last Name",
+                                          hintStyle: TextStyle(
+                                            fontSize: rs(context, 18),
+                                            color: Colors.black54.withAlpha(70),
+                                          ),
+                                          filled: true,
+                                          fillColor: Colors.white70.withOpacity(
+                                            0.65,
+                                          ),
+                                          alignLabelWithHint: true,
+                                          contentPadding: EdgeInsets.symmetric(
+                                            vertical: rs(context, 12),
+                                            horizontal: rs(context, 12),
+                                          ),
+                                          labelStyle: TextStyle(
+                                            color: Colors.black87,
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: Colors.black54,
+                                              width: 1,
+                                            ),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: Colors.yellow.shade700,
+                                              width: 2,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                          0.02,
+                                    ),
+                                  ],
+
+                                  // first name
+                                  if (_isSignUp) ...[
+                                    SizedBox(
+                                      height: rs(context, 45),
+                                      child: TextField(
+                                        controller: _firstNameController,
+                                        style: TextStyle(
+                                          color: Colors.black87,
+                                          fontSize: rs(context, 18),
+                                        ),
+                                        decoration: InputDecoration(
+                                          labelText: null,
+                                          hintText: "First Name",
+                                          hintStyle: TextStyle(
+                                            fontSize: rs(context, 18),
+                                            color: Colors.black54.withAlpha(70),
+                                          ),
+                                          filled: true,
+                                          fillColor: Colors.white70.withOpacity(
+                                            0.65,
+                                          ),
+                                          alignLabelWithHint: true,
+                                          contentPadding: EdgeInsets.symmetric(
+                                            vertical: rs(context, 12),
+                                            horizontal: rs(context, 12),
+                                          ),
+                                          labelStyle: TextStyle(
+                                            color: Colors.black87,
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: Colors.black54,
+                                              width: 1,
+                                            ),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: Colors.yellow.shade700,
+                                              width: 2,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                          0.02,
+                                    ),
+                                  ],
+
                                   // email
                                   SizedBox(
                                     height: rs(context, 45),
@@ -311,12 +429,12 @@ class _LoginPageState extends State<LoginPage>
                                         ),
                                       ),
                                     ),
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                          0.02,
+                                    ),
                                   ],
-                                  SizedBox(
-                                    height:
-                                        MediaQuery.of(context).size.height *
-                                        0.02,
-                                  ),
 
                                   // password
                                   SizedBox(
@@ -452,6 +570,12 @@ class _LoginPageState extends State<LoginPage>
                                                       key: const ValueKey(
                                                         "text",
                                                       ),
+                                                      style: TextStyle(
+                                                        fontSize: rs(
+                                                          context,
+                                                          18,
+                                                        ),
+                                                      ),
                                                       _isSignUp
                                                           ? "Sign Up"
                                                           : "Log In",
@@ -497,6 +621,60 @@ class _LoginPageState extends State<LoginPage>
                                     ),
                                   ],
 
+                                  if (!_isSignUp) ...[
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                          0.02,
+                                    ),
+                                    Row(
+                                      children: [
+                                        Expanded(child: Divider()),
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal:
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width *
+                                                0.03,
+                                          ),
+                                          child: Text("or"),
+                                        ),
+                                        Expanded(child: Divider()),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                          0.02,
+                                    ),
+
+                                    OutlinedButton.icon(
+                                      onPressed: () {
+                                        // insert google sign up function here
+                                      },
+                                      icon: Image.asset(
+                                        'lib/assets/images/google logo.png',
+                                        height: rs(context, 20),
+                                      ),
+                                      label: Text(
+                                        "Sign In via Google",
+                                        style: TextStyle(
+                                          color: Colors.black87.withOpacity(
+                                            0.8,
+                                          ),
+                                          fontSize: rs(context, 15),
+                                        ),
+                                      ),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: Colors.black87,
+                                        minimumSize: const Size.fromHeight(48),
+                                        side: const BorderSide(
+                                          color: Colors.transparent,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                   if (_isSignUp) ...[
                                     SizedBox(
                                       height:
@@ -533,7 +711,15 @@ class _LoginPageState extends State<LoginPage>
                                         'lib/assets/images/google logo.png',
                                         height: rs(context, 20),
                                       ),
-                                      label: const Text("Sign Up with Google"),
+                                      label: Text(
+                                        "Sign Up via Google",
+                                        style: TextStyle(
+                                          color: Colors.black87.withOpacity(
+                                            0.8,
+                                          ),
+                                          fontSize: rs(context, 15),
+                                        ),
+                                      ),
                                       style: OutlinedButton.styleFrom(
                                         foregroundColor: Colors.black87,
                                         minimumSize: const Size.fromHeight(48),
@@ -585,7 +771,9 @@ Widget _buildTab(
             child: Text(
               text,
               style: TextStyle(
-                color: isActive ? Colors.yellow.shade500 : Colors.black87.withOpacity(0.70),
+                color: isActive
+                    ? Colors.yellow.shade500
+                    : Colors.black87.withOpacity(0.7),
                 fontWeight: FontWeight.bold,
                 fontSize: rs(context, 15),
               ),

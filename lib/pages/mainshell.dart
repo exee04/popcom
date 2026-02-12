@@ -57,19 +57,20 @@ class _MainShellState extends State<MainShell> {
                 child: SizedBox(
                   height: kToolbarHeight,
                   child: Stack(
-                    alignment: Alignment.centerLeft,
+                    alignment: Alignment.center,
                     children: [
                       Padding(
-                        padding: const EdgeInsetsGeometry.only(left: 10),
+                        padding: const EdgeInsetsGeometry.only(left: 10, bottom: 5),
                         child: SizedBox(
                           height: 100,
                           child: Image.asset(
-                            'lib/assets/images/popcom logo.png',
+                            'lib/assets/images/popcom logo with text.png',
                             height: 100,
                             fit: BoxFit.contain,
                           ),
                         ),
                       ),
+                     
 
                       Positioned(
                         right: 12,
@@ -94,6 +95,7 @@ class _MainShellState extends State<MainShell> {
             ),
           ),
         ),
+        
       ),
 
       // side menu drawer
@@ -115,36 +117,42 @@ class _MainShellState extends State<MainShell> {
               Padding(
                 padding: EdgeInsetsGeometry.only(left: 10),
                 child: ListTile(
-                leading: const Icon(
-                  Icons.logout,
-                  color: Colors.white,
-                  size: 35,
+                  leading: const Icon(
+                    Icons.logout,
+                    color: Colors.white,
+                    size: 35,
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    logout();
+                  },
                 ),
-                onTap: () {
-                  Navigator.pop(context);
-                  logout();
-                },
-              ),
               ),
               const SizedBox(height: 20),
             ],
           ),
         ),
       ),
-      body: GradientBackground(
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          transitionBuilder: (child, animation) {
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0.05, 0),
-                end: Offset.zero,
-              ).animate(animation),
-              child: FadeTransition(opacity: animation, child: child),
-            );
-          },
-          child: pages[currentPage],
-        ),
+      body: Stack(
+        children: [
+          const GradientBackground(),
+          SafeArea(
+            top: false,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) {
+                return SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0.05, 0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: FadeTransition(opacity: animation, child: child),
+                );
+              },
+              child: pages[currentPage],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -181,8 +189,7 @@ class _MainShellState extends State<MainShell> {
 }
 
 class GradientBackground extends StatefulWidget {
-  final Widget child;
-  const GradientBackground({super.key, required this.child});
+  const GradientBackground({super.key});
 
   @override
   State<GradientBackground> createState() => _GradientBackgroundState();
@@ -226,7 +233,6 @@ class _GradientBackgroundState extends State<GradientBackground>
               colors: const [Color(0xFFE61A4B), Color(0xFFFFEA21)],
             ),
           ),
-          child: widget.child,
         );
       },
     );
