@@ -108,7 +108,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
-          SizedBox(height: rs(context,16)),
+          const SizedBox(height: 16),
           Expanded(
             child: glassPanel(
               context,
@@ -193,7 +193,8 @@ Widget _buildGlassCard(BuildContext context, index, {bool isList = false}) {
           border: Border.all(color: Colors.white.withOpacity(0.4)),
         ),
         child: isList
-            ? Row( // List view
+            ? Row(
+                // List view
                 children: [
                   Container(
                     width: rs(context, 80),
@@ -212,9 +213,9 @@ Widget _buildGlassCard(BuildContext context, index, {bool isList = false}) {
                       SizedBox(height: rs(context, 12)),
                       Text(
                         "Item Name", // change item name here
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: rs(context, 16),
+                          fontSize: 16,
                         ),
                       ),
                       Text(
@@ -231,7 +232,8 @@ Widget _buildGlassCard(BuildContext context, index, {bool isList = false}) {
                   SizedBox(width: rs(context, 12)),
                 ],
               )
-            : Column( // Grid view
+            : Column(
+                // Grid view
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
@@ -246,9 +248,9 @@ Widget _buildGlassCard(BuildContext context, index, {bool isList = false}) {
                   SizedBox(height: rs(context, 8)),
                   Text(
                     "Item Name", // change item name here
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: rs(context, 16),
+                      fontSize: 16,
                     ),
                   ),
                   SizedBox(height: rs(context, 5)),

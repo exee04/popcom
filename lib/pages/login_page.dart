@@ -70,7 +70,7 @@ class _LoginPageState extends State<LoginPage>
     setState(() => _loading = true);
 
     try {
-      // attempt sign in
+      // attempt sign up
       if (_isSignUp) {
         await authService.signUpWithEmailPassword(
           email,
@@ -81,14 +81,11 @@ class _LoginPageState extends State<LoginPage>
         );
         _showSnack("Check your email to confirm.");
       }
-      // attempt sign up
+      // attempt sign in
       else {
-        await authService.signUpWithEmailPassword(
+        await authService.signInWithEmailPassword(
           email,
           password,
-          username,
-          lastname,
-          firstname,
         );
         _showSnack("Successfully logged in.");
       }
