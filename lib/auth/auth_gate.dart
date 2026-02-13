@@ -11,8 +11,8 @@ class AuthGate extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder(
       // Listen to auth state changes
-      stream: Supabase.instance.client.auth.onAuthStateChange, 
-      
+      stream: Supabase.instance.client.auth.onAuthStateChange,
+
       // Build appropriate page based on auth state
       builder: (context, snapshot) {
         // loading..
@@ -26,8 +26,7 @@ class AuthGate extends StatelessWidget {
 
         if (session != null) {
           return const MainShell();
-        }
-        else {
+        } else {
           return const LoginPage();
         }
       },

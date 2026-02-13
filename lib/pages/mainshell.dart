@@ -1,8 +1,9 @@
+import 'dart:math';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:popcom/auth/auth_service.dart';
 import 'package:popcom/pages/home_page.dart';
-import 'dart:math';
-import 'dart:ui';
 
 enum AppPage { home, statistics, pageSettings, accountSettings }
 
@@ -14,125 +15,51 @@ class MainShell extends StatefulWidget {
 }
 
 class _MainShellState extends State<MainShell> {
-  // get auth service
-  final authService = AuthService();
+  final AuthService _authService = AuthService();
 
-  //logout button pressed
-  void logout() async {
-    await authService.signOut();
-  }
+  String? _accountType;
+  bool _loadingAccountType = true;
 
-  AppPage currentPage = AppPage.home;
+  AppPage _currentPage = AppPage.home;
 
-  final Map<AppPage, Widget> pages = {
+  late final Map<AppPage, Widget> _pages = {
     AppPage.home: const HomePage(key: ValueKey('home')),
+    // AppPage.statistics: const StatisticsPage(),
   };
 
   @override
+  void initState() {
+    super.initState();
+    _loadAccountType();
+  }
+
+  Future<void> _loadAccountType() async {
+    final type = await _authService.getAccountType();
+
+    if (!mounted) return;
+
+    setState(() {
+      _accountType = type;
+      _loadingAccountType = false;
+    });
+  }
+
+  void _logout() async {
+    await _authService.signOut();
+  }
+
+  // ================= UI =================
+
+  @override
   Widget build(BuildContext context) {
+    if (_loadingAccountType) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        toolbarHeight: 70,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        automaticallyImplyActions: false,
-        centerTitle: true,
-
-        flexibleSpace: ClipRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.70),
-                border: Border(
-                  bottom: BorderSide(
-                    color: Colors.white.withOpacity(0.55),
-                    width: 1,
-                  ),
-                ),
-              ),
-              child: SafeArea(
-                bottom: false,
-                child: SizedBox(
-                  height: kToolbarHeight,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsetsGeometry.only(left: 10, bottom: 5),
-                        child: SizedBox(
-                          height: 100,
-                          child: Image.asset(
-                            'lib/assets/images/popcom logo with text.png',
-                            height: 100,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                     
-
-                      Positioned(
-                        right: 12,
-                        top: 0,
-                        bottom: 0,
-                        // menu button
-                        child: Builder(
-                          builder: (context) => IconButton(
-                            onPressed: Scaffold.of(context).openEndDrawer,
-                            icon: const Icon(Icons.menu),
-                            style: IconButton.styleFrom(
-                              foregroundColor: Colors.black87,
-                              iconSize: 35,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        
-      ),
-
-      // side menu drawer
-      endDrawer: Drawer(
-        child: Container(
-          color: Colors.red.shade500,
-          child: Column(
-            children: [
-              Image.asset(
-                'lib/assets/images/popcom logo.png',
-                height: 100,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(height: 30),
-              _drawerItem(Icons.home, "Home", AppPage.home),
-              const Spacer(),
-
-              // logout button
-              Padding(
-                padding: EdgeInsetsGeometry.only(left: 10),
-                child: ListTile(
-                  leading: const Icon(
-                    Icons.logout,
-                    color: Colors.white,
-                    size: 35,
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    logout();
-                  },
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
+      appBar: _buildAppBar(),
+      endDrawer: _buildDrawer(),
       body: Stack(
         children: [
           const GradientBackground(),
@@ -149,7 +76,7 @@ class _MainShellState extends State<MainShell> {
                   child: FadeTransition(opacity: animation, child: child),
                 );
               },
-              child: pages[currentPage],
+              child: _pages[_currentPage],
             ),
           ),
         ],
@@ -157,36 +84,130 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
+  // ================= AppBar =================
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      toolbarHeight: 70,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      automaticallyImplyLeading: false,
+      centerTitle: true,
+      flexibleSpace: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.70),
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.white.withOpacity(0.55),
+                  width: 1,
+                ),
+              ),
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10, bottom: 5),
+                    child: Image.asset(
+                      'lib/assets/images/popcom logo with text.png',
+                      height: 60,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  Positioned(
+                    right: 12,
+                    child: Builder(
+                      builder: (context) => IconButton(
+                        onPressed: Scaffold.of(context).openEndDrawer,
+                        icon: const Icon(Icons.menu),
+                        iconSize: 35,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ================= Drawer =================
+
+  Widget _buildDrawer() {
+    return Drawer(
+      child: Container(
+        color: Colors.red.shade500,
+        child: Column(
+          children: [
+            const SizedBox(height: 40),
+            Image.asset('lib/assets/images/popcom logo.png', height: 90),
+            const SizedBox(height: 30),
+
+            _drawerItem(Icons.home, 'Home', AppPage.home),
+
+            if (_accountType == 'ADMIN')
+              _drawerItem(Icons.bar_chart, 'Statistics', AppPage.statistics),
+
+            const Spacer(),
+
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.white, size: 35),
+              onTap: () {
+                Navigator.pop(context);
+                _logout();
+              },
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _drawerItem(IconData icon, String title, AppPage page) {
-    final isActive = currentPage == page;
+    final isActive = _currentPage == page;
 
     return Padding(
-      padding: EdgeInsetsGeometry.only(left: 15),
+      padding: const EdgeInsets.only(left: 15),
       child: ListTile(
         leading: Icon(
           icon,
           color: isActive ? Colors.yellow : Colors.white70,
           size: 35,
         ),
-        title: Padding(
-          padding: const EdgeInsets.only(top: 5),
-          child: Text(
-            title,
-            style: TextStyle(
-              color: isActive ? Colors.yellow : Colors.white70,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-              fontSize: 25,
-            ),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: isActive ? Colors.yellow : Colors.white70,
+            fontSize: 25,
+            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
           ),
         ),
         onTap: () {
+          if (page == AppPage.statistics && _accountType != 'ADMIN') {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Access denied')));
+            return;
+          }
+
           Navigator.pop(context);
-          setState(() => currentPage = page);
+          setState(() => _currentPage = page);
         },
       ),
     );
   }
 }
+
+// ================= Animated Background =================
 
 class GradientBackground extends StatefulWidget {
   const GradientBackground({super.key});
@@ -197,7 +218,7 @@ class GradientBackground extends StatefulWidget {
 
 class _GradientBackgroundState extends State<GradientBackground>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+  late final AnimationController _controller;
 
   @override
   void initState() {
@@ -218,7 +239,7 @@ class _GradientBackgroundState extends State<GradientBackground>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (context, _) {
+      builder: (_, __) {
         return Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(

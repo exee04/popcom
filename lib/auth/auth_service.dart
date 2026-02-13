@@ -44,4 +44,17 @@ class AuthService {
     final user = session?.user;
     return user?.email;
   }
+
+  Future<String?> getAccountType() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return null;
+
+    final response = await _supabase
+        .from('Profile')
+        .select('account_type')
+        .eq('profile_id', user.id)
+        .single();
+
+    return response['account_type'] as String?;
+  }
 }
