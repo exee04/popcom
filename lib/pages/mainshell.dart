@@ -4,6 +4,15 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:popcom/auth/auth_service.dart';
 import 'package:popcom/pages/home_page.dart';
+<<<<<<< Updated upstream
+=======
+import 'dart:ui';
+>>>>>>> Stashed changes
+
+double rs(BuildContext context, double size) {
+  final shortestSide = MediaQuery.of(context).size.shortestSide;
+  return size * (shortestSide / 375).clamp(0.85, 1.1);
+}
 
 enum AppPage { home, statistics, pageSettings, accountSettings }
 
@@ -58,8 +67,111 @@ class _MainShellState extends State<MainShell> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
+<<<<<<< Updated upstream
       appBar: _buildAppBar(),
       endDrawer: _buildDrawer(),
+=======
+      appBar: AppBar(
+        toolbarHeight: rs(context, 70),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyActions: false,
+        centerTitle: true,
+
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.70),
+                border: Border(
+                  bottom: BorderSide(
+                    color: Colors.white.withOpacity(0.55),
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: SafeArea(
+                bottom: false,
+                child: SizedBox(
+                  height: rs(context, kToolbarHeight),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Padding(
+                        padding: EdgeInsetsGeometry.only(
+                          left: rs(context, 10),
+                          bottom: rs(context, 5),
+                        ),
+                        child: SizedBox(
+                          height: rs(context, 100),
+                          child: Image.asset(
+                            'lib/assets/images/popcom logo with text.png',
+                            height: rs(context, 100),
+                            width: rs(context, 200),
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        right: rs(context, 12),
+                        top: (rs(context, 70) - rs(context, 40)) / 2,
+                        bottom: (rs(context, 70) - rs(context, 55)) / 2,
+                        // menu button
+                        child: Builder(
+                          builder: (context) => _actionButton(
+                            onTap: Scaffold.of(context).openEndDrawer,
+                            icon: Icons.menu,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+
+      // side menu drawer
+      endDrawer: Drawer(
+        child: Container(
+          color: Colors.red.shade500,
+          child: Column(
+            children: [
+              Image.asset(
+                'lib/assets/images/popcom logo.png',
+                height: rs(context, 100),
+                width: rs(context, 70),
+                fit: BoxFit.contain,
+              ),
+              SizedBox(height: rs(context, 30)),
+              _drawerItem(Icons.home, "Home", AppPage.home),
+              const Spacer(),
+
+              Padding(
+                padding: EdgeInsets.only(left: rs(context, 10)),
+                // logout button
+                child: ListTile(
+                  leading: Icon(
+                    Icons.logout,
+                    color: Colors.white,
+                    size: rs(context, 25),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    logout();
+                  },
+                ),
+              ),
+              SizedBox(height: rs(context, 20)),
+            ],
+          ),
+        ),
+      ),
+>>>>>>> Stashed changes
       body: Stack(
         children: [
           const GradientBackground(),
@@ -175,6 +287,7 @@ class _MainShellState extends State<MainShell> {
   Widget _drawerItem(IconData icon, String title, AppPage page) {
     final isActive = _currentPage == page;
 
+<<<<<<< Updated upstream
     return Padding(
       padding: const EdgeInsets.only(left: 15),
       child: ListTile(
@@ -202,6 +315,39 @@ class _MainShellState extends State<MainShell> {
           Navigator.pop(context);
           setState(() => _currentPage = page);
         },
+=======
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+        setState(() => currentPage = page);
+      },
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: rs(context, 15),
+          vertical: rs(context, 8),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: isActive ? Colors.yellow : Colors.white70,
+              size: rs(context, 25),
+            ),
+            SizedBox(width: rs(context, 10)),
+            Flexible(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: isActive ? Colors.yellow : Colors.white70,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                  fontSize: rs(context, 16),
+                ),
+              ),
+            ),
+          ],
+        ),
+>>>>>>> Stashed changes
       ),
     );
   }
@@ -237,6 +383,7 @@ class _GradientBackgroundState extends State<GradientBackground>
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< Updated upstream
     return AnimatedBuilder(
       animation: _controller,
       builder: (_, __) {
@@ -256,6 +403,41 @@ class _GradientBackgroundState extends State<GradientBackground>
           ),
         );
       },
+=======
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+
+          end: Alignment.bottomRight,
+          colors: const [Color(0xFFE61A4B), Color(0xFFFFEA21)],
+        ),
+      ),
+>>>>>>> Stashed changes
     );
   }
+}
+
+// reusable button template
+Widget _actionButton({required IconData icon, required VoidCallback onTap}) {
+  return Builder(
+    builder: (context) {
+      return Container(
+        height: rs(context, 45),
+        width: rs(context, 45),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFDC62D).withOpacity(0.85),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.black87),
+          boxShadow: const [
+            BoxShadow(color: Colors.black, offset: Offset(0, 4)),
+          ],
+        ),
+        child: IconButton(
+          icon: Icon(icon, color: Colors.black87, size: rs(context, 22)),
+          onPressed: onTap,
+        ),
+      );
+    },
+  );
 }

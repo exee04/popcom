@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 double rs(BuildContext context, double size) {
@@ -75,7 +77,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
-              const SizedBox(width: 8),
+              SizedBox(width: rs(context, 8)),
 
               // filter button
               _actionButton(
@@ -84,7 +86,7 @@ class _HomePageState extends State<HomePage> {
                   print("Filter pressed");
                 },
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: rs(context, 8)),
 
               // sort button
               _actionButton(
@@ -93,7 +95,7 @@ class _HomePageState extends State<HomePage> {
                   print("Sort pressed");
                 },
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: rs(context, 8)),
 
               // toggle view
               _actionButton(
@@ -104,10 +106,22 @@ class _HomePageState extends State<HomePage> {
                   });
                 },
               ),
+<<<<<<< Updated upstream
 
               const SizedBox(height: 16),
               //Expanded(child: _isGrid ? _buildGridView() : _buildListView()),
+=======
+>>>>>>> Stashed changes
             ],
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: glassPanel(
+              context,
+              child: _isGrid
+                  ? _buildGridView(context)
+                  : _buildListView(context),
+            ),
           ),
         ],
       ),
@@ -115,6 +129,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+// reusable button template
 Widget _actionButton({required IconData icon, required VoidCallback onTap}) {
   return Builder(
     builder: (context) {
@@ -122,7 +137,7 @@ Widget _actionButton({required IconData icon, required VoidCallback onTap}) {
         height: rs(context, 45),
         width: rs(context, 45),
         decoration: BoxDecoration(
-          color: const Color(0xFFE61A4B).withOpacity(0.85),
+          color: const Color(0xFFFDC62D).withOpacity(0.85),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.black87),
           boxShadow: const [
@@ -130,7 +145,7 @@ Widget _actionButton({required IconData icon, required VoidCallback onTap}) {
           ],
         ),
         child: IconButton(
-          icon: Icon(icon, color: Colors.yellow.shade500, size: 22),
+          icon: Icon(icon, color: Colors.black87, size: 22),
           onPressed: onTap,
         ),
       );
@@ -139,6 +154,7 @@ Widget _actionButton({required IconData icon, required VoidCallback onTap}) {
 }
 
 // grid view widget
+<<<<<<< Updated upstream
 //Widget _buildGridView() {
 // return GridView.builder(
 //    itemCount: 10,
@@ -159,3 +175,147 @@ Widget _actionButton({required IconData icon, required VoidCallback onTap}) {
 //  return ListView.separated(itemCount: 10,
 //  separatorBuilder: (_,),)
 //}
+=======
+Widget _buildGridView(BuildContext context) {
+  final width = MediaQuery.of(context).size.width;
+  final crossAxisCount = width >= 400 ? 3 : 2;
+  return GridView.builder(
+    padding: EdgeInsets.only(top: rs(context, 20), bottom: rs(context, 5)),
+    itemCount: 10,
+    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: crossAxisCount,
+      crossAxisSpacing: rs(context, 12),
+      mainAxisSpacing: rs(context, 12),
+      childAspectRatio: 0.65,
+    ),
+    itemBuilder: (context, index) {
+      return _buildGlassCard(context, index);
+    },
+  );
+}
+
+// list view widget
+Widget _buildListView(BuildContext context) {
+  return ListView.separated(
+    padding: EdgeInsets.only(top: rs(context, 20), bottom: rs(context, 5)),
+    itemCount: 10,
+    separatorBuilder: (_, ___) => SizedBox(height: rs(context, 12)),
+    itemBuilder: (context, index) {
+      return _buildGlassCard(context, index, isList: true);
+    },
+  );
+}
+
+// Cards for items displayed
+Widget _buildGlassCard(BuildContext context, index, {bool isList = false}) {
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(16),
+    child: BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+      child: Container(
+        height: isList ? rs(context, 120) : null,
+        padding: EdgeInsets.all(rs(context, 12)),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.4)),
+        ),
+        child: isList
+            ? Row( // List view
+                children: [
+                  Container(
+                    width: rs(context, 80),
+                    height: rs(context, 80),
+                    decoration: BoxDecoration(
+                      // Change to image file if already available
+                      color: Colors.white.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  SizedBox(width: rs(context, 12)),
+
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: rs(context, 12)),
+                      Text(
+                        "Item Name", // change item name here
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        "SKU: ", // change SKU here
+                        style: TextStyle(fontSize: rs(context, 15)),
+                        textAlign: TextAlign.left,
+                      ),
+                      Text(
+                        "Qty: ", // change Qty here
+                        style: TextStyle(fontSize: rs(context, 15)),
+                      ),
+                    ],
+                  ),
+                  SizedBox(width: rs(context, 12)),
+                ],
+              )
+            : Column( // Grid view
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        // Change to image file if already available
+                        color: Colors.white.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: rs(context, 8)),
+                  Text(
+                    "Item Name", // change item name here
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  SizedBox(height: rs(context, 5)),
+                  Text(
+                    "SKU: ", // change SKU here
+                    style: TextStyle(fontSize: rs(context, 14)),
+                  ),
+                  SizedBox(height: rs(context, 5)),
+                  Text(
+                    "Qty: ", // change Qty here
+                    style: TextStyle(fontSize: rs(context, 14)),
+                  ),
+                ],
+              ),
+      ),
+    ),
+  );
+}
+
+Widget glassPanel(BuildContext context, {required Widget child}) {
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(20),
+    child: BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+      child: Container(
+        padding: EdgeInsets.fromLTRB(
+          rs(context, 12),
+          0,
+          rs(context, 12),
+          rs(context, 12),
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.40),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.6)),
+        ),
+        child: child,
+      ),
+    ),
+  );
+}
+>>>>>>> Stashed changes
