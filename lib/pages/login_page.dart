@@ -83,10 +83,7 @@ class _LoginPageState extends State<LoginPage>
       }
       // attempt sign in
       else {
-        await authService.signInWithEmailPassword(
-          email,
-          password,
-        );
+        await authService.signInWithEmailPassword(email, password);
         _showSnack("Successfully logged in.");
       }
     } catch (e) {
@@ -137,7 +134,7 @@ class _LoginPageState extends State<LoginPage>
                   ),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
+                      minHeight: rs(context, constraints.maxHeight),
                     ),
                     child: Center(
                       child: Column(

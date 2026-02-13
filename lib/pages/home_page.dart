@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 double rs(BuildContext context, double size) {
@@ -23,9 +22,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsetsGeometry.only(
-        top: kToolbarHeight + MediaQuery.of(context).padding.top,
-        left: 16,
-        right: 16,
+        top: rs(context, kToolbarHeight + MediaQuery.of(context).padding.top),
+        left: rs(context, 16),
+        right: rs(context, 16),
       ),
       child: Column(
         children: [
@@ -106,9 +105,54 @@ class _HomePageState extends State<HomePage> {
                   });
                 },
               ),
+              SizedBox(width: rs(context, 8)),
+              IntrinsicWidth(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        elevation: 5,
+                        shadowColor: Colors.black45,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        "Add Item",
+                        style: TextStyle(
+                          fontSize: rs(context, 16),
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: rs(context, 8)),
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        elevation: 5,
+                        shadowColor: Colors.black45,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        "Pull Out",
+                        style: TextStyle(
+                          fontSize: rs(context, 16),
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: rs(context, 16)),
           Expanded(
             child: glassPanel(
               context,
@@ -139,7 +183,7 @@ Widget _actionButton({required IconData icon, required VoidCallback onTap}) {
           ],
         ),
         child: IconButton(
-          icon: Icon(icon, color: Colors.black87, size: 22),
+          icon: Icon(icon, color: Colors.black87, size: rs(context, 22)),
           onPressed: onTap,
         ),
       );
@@ -213,9 +257,9 @@ Widget _buildGlassCard(BuildContext context, index, {bool isList = false}) {
                       SizedBox(height: rs(context, 12)),
                       Text(
                         "Item Name", // change item name here
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: rs(context, 16),
                         ),
                       ),
                       Text(
@@ -248,9 +292,9 @@ Widget _buildGlassCard(BuildContext context, index, {bool isList = false}) {
                   SizedBox(height: rs(context, 8)),
                   Text(
                     "Item Name", // change item name here
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: rs(context, 16),
                     ),
                   ),
                   SizedBox(height: rs(context, 5)),

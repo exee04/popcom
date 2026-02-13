@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:popcom/auth/auth_service.dart';
+import 'package:popcom/pages/account_settings_page.dart';
+import 'package:popcom/pages/account_status_page.dart';
 import 'package:popcom/pages/home_page.dart';
+import 'package:popcom/pages/page_settings_page.dart';
 import 'dart:ui';
+import 'package:popcom/pages/statistics_page.dart';
 
-enum AppPage { home, statistics, pageSettings, accountSettings }
+double rs(BuildContext context, double size) {
+  final width = MediaQuery.of(context).size.width;
+  return size * (width / 375).clamp(0.9, 1.2);
+}
+
+enum AppPage { home, statistics, accountStatus, pageSettings, accountSettings }
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -20,16 +29,83 @@ class _MainShellState extends State<MainShell> {
     await authService.signOut();
   }
 
+  Widget _headerForCurrentPage(BuildContext context) {
+    switch (currentPage) {
+      case AppPage.home:
+        return Center(
+          child: Image.asset(
+            'lib/assets/images/popcom logo with text.png',
+            height: rs(context, 100),
+            fit: BoxFit.contain,
+          ),
+        );
+      case AppPage.statistics:
+        return Center(
+          child: Text(
+            "Statistics",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: rs(context, 22),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+      case AppPage.accountStatus:
+        return Center(
+          child: Text(
+            "Account Status",
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: rs(context, 22),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+      case AppPage.accountSettings:
+        return Center(
+          child: Text(
+            "Account Settings",
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: rs(context, 22),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+      case AppPage.pageSettings:
+        return Center(
+          child: Text(
+            "Page Settings",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: rs(context, 22),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+    }
+  }
+
   AppPage currentPage = AppPage.home;
   final Map<AppPage, Widget> pages = {
     AppPage.home: const HomePage(key: ValueKey('home')),
+    AppPage.statistics: const StatisticsPage(key: ValueKey('statistics')),
+    AppPage.accountStatus: const AccountStatusPage(
+      key: ValueKey('accountStatus'),
+    ),
+    AppPage.pageSettings: const PageSettingsPage(key: ValueKey('pageSettings')),
+    AppPage.accountSettings: const AccountSettingsPage(
+      key: ValueKey('accountSettings'),
+    ),
   };
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        toolbarHeight: 70,
+        toolbarHeight: rs(context, 70),
         backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyActions: false,
@@ -50,28 +126,24 @@ class _MainShellState extends State<MainShell> {
               child: SafeArea(
                 bottom: false,
                 child: SizedBox(
-                  height: kToolbarHeight,
+                  height: rs(context, kToolbarHeight),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       Padding(
-                        padding: const EdgeInsetsGeometry.only(
-                          left: 10,
-                          bottom: 5,
+                        padding: EdgeInsetsGeometry.only(
+                          left: rs(context, 10),
+                          bottom: rs(context, 5),
                         ),
                         child: SizedBox(
-                          height: 100,
-                          child: Image.asset(
-                            'lib/assets/images/popcom logo with text.png',
-                            height: 100,
-                            fit: BoxFit.contain,
-                          ),
+                          height: rs(context, 100),
+                          child: _headerForCurrentPage(context),
                         ),
                       ),
                       Positioned(
-                        right: 12,
-                        top: (kToolbarHeight - 45) / 2,
-                        bottom: (kToolbarHeight - 35) / 2,
+                        right: rs(context, 12),
+                        top: rs(context, (kToolbarHeight - 50) / 2),
+                        bottom: rs(context, (kToolbarHeight - 40) / 2),
                         // menu button
                         child: Builder(
                           builder: (context) => _actionButton(
@@ -87,7 +159,7 @@ class _MainShellState extends State<MainShell> {
             ),
           ),
         ),
-      ), 
+      ),
       // side menu drawer
       endDrawer: Drawer(
         child: Container(
@@ -96,19 +168,42 @@ class _MainShellState extends State<MainShell> {
             children: [
               Image.asset(
                 'lib/assets/images/popcom logo.png',
-                height: 100,
+                height: rs(context, 100),
                 fit: BoxFit.contain,
               ),
-              const SizedBox(height: 30),
+              SizedBox(height: rs(context, 30)),
               _drawerItem(Icons.home, "Home", AppPage.home),
-              const Spacer(), // logout button
+              SizedBox(height: rs(context, 15)),
+              _drawerItem(Icons.bar_chart, "Statistics", AppPage.statistics),
+              SizedBox(height: rs(context, 15)),
+              _drawerItem(
+                Icons.person_search_rounded,
+                "Account Status",
+                AppPage.accountStatus,
+              ),
+
+              SizedBox(height: rs(context, 15)),
+              _drawerItem(
+                Icons.manage_accounts,
+                "Account Settings",
+                AppPage.accountSettings,
+              ),
+              SizedBox(height: rs(context, 15)),
+              _drawerItem(
+                Icons.settings,
+                "Page Settings",
+                AppPage.pageSettings,
+              ),
+              const Spacer(),
+
+              // logout button
               Padding(
-                padding: EdgeInsetsGeometry.only(left: 10),
+                padding: EdgeInsetsGeometry.only(left: rs(context, 10)),
                 child: ListTile(
-                  leading: const Icon(
+                  leading: Icon(
                     Icons.logout,
                     color: Colors.white,
-                    size: 35,
+                    size: rs(context, 35),
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -116,7 +211,7 @@ class _MainShellState extends State<MainShell> {
                   },
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: rs(context, 20)),
             ],
           ),
         ),
@@ -148,21 +243,21 @@ class _MainShellState extends State<MainShell> {
   Widget _drawerItem(IconData icon, String title, AppPage page) {
     final isActive = currentPage == page;
     return Padding(
-      padding: EdgeInsetsGeometry.only(left: 15),
+      padding: EdgeInsetsGeometry.only(left: rs(context, 15)),
       child: ListTile(
         leading: Icon(
           icon,
           color: isActive ? Colors.yellow : Colors.white70,
-          size: 35,
+          size: rs(context, 35),
         ),
         title: Padding(
-          padding: const EdgeInsets.only(top: 5),
+          padding: EdgeInsets.only(top: rs(context, 5)),
           child: Text(
             title,
             style: TextStyle(
               color: isActive ? Colors.yellow : Colors.white70,
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-              fontSize: 25,
+              fontSize: rs(context, 18),
             ),
           ),
         ),
@@ -229,7 +324,7 @@ Widget _actionButton({required IconData icon, required VoidCallback onTap}) {
           ],
         ),
         child: IconButton(
-          icon: Icon(icon, color: Colors.black87, size: 22),
+          icon: Icon(icon, color: Colors.black87, size: rs(context, 22)),
           onPressed: onTap,
         ),
       );
