@@ -106,15 +106,9 @@ class _HomePageState extends State<HomePage> {
                   });
                 },
               ),
-<<<<<<< Updated upstream
-
-              const SizedBox(height: 16),
-              //Expanded(child: _isGrid ? _buildGridView() : _buildListView()),
-=======
->>>>>>> Stashed changes
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: rs(context,16)),
           Expanded(
             child: glassPanel(
               context,
@@ -154,28 +148,6 @@ Widget _actionButton({required IconData icon, required VoidCallback onTap}) {
 }
 
 // grid view widget
-<<<<<<< Updated upstream
-//Widget _buildGridView() {
-// return GridView.builder(
-//    itemCount: 10,
-//    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-//      crossAxisCount: 2,
-//      crossAxisSpacing: 12,
-//      mainAxisSpacing: 12,
-//      childAspectRatio: 0.8,
-//    ),
-//    itemBuilder: (context, index) {
-//      return _buildGlassCard(index);
-//    },
-//  );
-//}
-
-// list view widget
-// Widget _buildListView() {
-//  return ListView.separated(itemCount: 10,
-//  separatorBuilder: (_,),)
-//}
-=======
 Widget _buildGridView(BuildContext context) {
   final width = MediaQuery.of(context).size.width;
   final crossAxisCount = width >= 400 ? 3 : 2;
@@ -240,9 +212,9 @@ Widget _buildGlassCard(BuildContext context, index, {bool isList = false}) {
                       SizedBox(height: rs(context, 12)),
                       Text(
                         "Item Name", // change item name here
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: rs(context, 16),
                         ),
                       ),
                       Text(
@@ -274,9 +246,9 @@ Widget _buildGlassCard(BuildContext context, index, {bool isList = false}) {
                   SizedBox(height: rs(context, 8)),
                   Text(
                     "Item Name", // change item name here
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: rs(context, 16),
                     ),
                   ),
                   SizedBox(height: rs(context, 5)),
@@ -318,4 +290,3 @@ Widget glassPanel(BuildContext context, {required Widget child}) {
     ),
   );
 }
->>>>>>> Stashed changes
