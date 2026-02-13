@@ -33,18 +33,19 @@ class _HomePageState extends State<HomePage> {
               // search bar
               Expanded(
                 child: SizedBox(
-                  height: rs(context, 45),
+                  height: rs(context, 35),
                   child: TextField(
+                    textAlign: TextAlign.left,
                     controller: _searchController,
                     style: TextStyle(
                       color: Colors.black87,
-                      fontSize: rs(context, 18),
+                      fontSize: rs(context, 15),
                     ),
                     decoration: InputDecoration(
                       labelText: null,
                       hintText: "Search Items",
                       hintStyle: TextStyle(
-                        fontSize: rs(context, 18),
+                        fontSize: rs(context, 12),
                         color: Colors.black54.withAlpha(70),
                       ),
 
@@ -76,7 +77,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
-              SizedBox(width: rs(context, 8)),
+              SizedBox(width: rs(context, 5)),
 
               // filter button
               _actionButton(
@@ -105,52 +106,52 @@ class _HomePageState extends State<HomePage> {
                   });
                 },
               ),
-              SizedBox(width: rs(context, 8)),
-              IntrinsicWidth(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        elevation: 5,
-                        shadowColor: Colors.black45,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        "Add Item",
-                        style: TextStyle(
-                          fontSize: rs(context, 16),
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: rs(context, 8)),
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        elevation: 5,
-                        shadowColor: Colors.black45,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        "Pull Out",
-                        style: TextStyle(
-                          fontSize: rs(context, 16),
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
+          ),
+          SizedBox(height: rs(context, 10)),
+          SizedBox(
+            height: rs(context, 40),
+            child: Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    elevation: 5,
+                    shadowColor: Colors.black45,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    "Add Item",
+                    style: TextStyle(
+                      fontSize: rs(context, 12),
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+                SizedBox(width: rs(context, 15)),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    elevation: 5,
+                    shadowColor: Colors.black45,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    "Pull Out",
+                    style: TextStyle(
+                      fontSize: rs(context, 12),
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           SizedBox(height: rs(context, 16)),
           Expanded(
@@ -161,6 +162,7 @@ class _HomePageState extends State<HomePage> {
                   : _buildListView(context),
             ),
           ),
+          SizedBox(height: rs(context, 16)),
         ],
       ),
     );
@@ -172,8 +174,8 @@ Widget _actionButton({required IconData icon, required VoidCallback onTap}) {
   return Builder(
     builder: (context) {
       return Container(
-        height: rs(context, 45),
-        width: rs(context, 45),
+        height: rs(context, 35),
+        width: rs(context, 35),
         decoration: BoxDecoration(
           color: const Color(0xFFFDC62D).withOpacity(0.85),
           borderRadius: BorderRadius.circular(8),
@@ -183,7 +185,7 @@ Widget _actionButton({required IconData icon, required VoidCallback onTap}) {
           ],
         ),
         child: IconButton(
-          icon: Icon(icon, color: Colors.black87, size: rs(context, 22)),
+          icon: Icon(icon, color: Colors.black87, size: rs(context, 18)),
           onPressed: onTap,
         ),
       );
@@ -259,17 +261,17 @@ Widget _buildGlassCard(BuildContext context, index, {bool isList = false}) {
                         "Item Name", // change item name here
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: rs(context, 16),
+                          fontSize: rs(context, 14),
                         ),
                       ),
                       Text(
                         "SKU: ", // change SKU here
-                        style: TextStyle(fontSize: rs(context, 15)),
+                        style: TextStyle(fontSize: rs(context, 13)),
                         textAlign: TextAlign.left,
                       ),
                       Text(
                         "Qty: ", // change Qty here
-                        style: TextStyle(fontSize: rs(context, 15)),
+                        style: TextStyle(fontSize: rs(context, 13)),
                       ),
                     ],
                   ),
@@ -294,18 +296,18 @@ Widget _buildGlassCard(BuildContext context, index, {bool isList = false}) {
                     "Item Name", // change item name here
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: rs(context, 16),
+                      fontSize: rs(context, 15),
                     ),
                   ),
                   SizedBox(height: rs(context, 5)),
                   Text(
                     "SKU: ", // change SKU here
-                    style: TextStyle(fontSize: rs(context, 14)),
+                    style: TextStyle(fontSize: rs(context, 13)),
                   ),
                   SizedBox(height: rs(context, 5)),
                   Text(
                     "Qty: ", // change Qty here
-                    style: TextStyle(fontSize: rs(context, 14)),
+                    style: TextStyle(fontSize: rs(context, 13)),
                   ),
                 ],
               ),

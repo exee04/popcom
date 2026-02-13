@@ -35,7 +35,8 @@ class _MainShellState extends State<MainShell> {
         return Center(
           child: Image.asset(
             'lib/assets/images/popcom logo with text.png',
-            height: rs(context, 100),
+            height: rs(context, 80),
+            width: rs(context, 190),
             fit: BoxFit.contain,
           ),
         );
@@ -46,7 +47,7 @@ class _MainShellState extends State<MainShell> {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.black87,
-              fontSize: rs(context, 22),
+              fontSize: rs(context, 18),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -57,7 +58,7 @@ class _MainShellState extends State<MainShell> {
             "Account Status",
             style: TextStyle(
               color: Colors.black87,
-              fontSize: rs(context, 22),
+              fontSize: rs(context, 18),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -68,7 +69,7 @@ class _MainShellState extends State<MainShell> {
             "Account Settings",
             style: TextStyle(
               color: Colors.black87,
-              fontSize: rs(context, 22),
+              fontSize: rs(context, 18),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -80,7 +81,7 @@ class _MainShellState extends State<MainShell> {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.black87,
-              fontSize: rs(context, 22),
+              fontSize: rs(context, 18),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -141,9 +142,9 @@ class _MainShellState extends State<MainShell> {
                         ),
                       ),
                       Positioned(
-                        right: rs(context, 12),
-                        top: rs(context, (kToolbarHeight - 50) / 2),
-                        bottom: rs(context, (kToolbarHeight - 40) / 2),
+                        right: rs(context, 15),
+                        top: rs(context, (kToolbarHeight - 40) / 2),
+                        bottom: rs(context, (kToolbarHeight - 30) / 2),
                         // menu button
                         child: Builder(
                           builder: (context) => _actionButton(
@@ -168,27 +169,27 @@ class _MainShellState extends State<MainShell> {
             children: [
               Image.asset(
                 'lib/assets/images/popcom logo.png',
-                height: rs(context, 100),
+                height: rs(context, 70),
                 fit: BoxFit.contain,
               ),
               SizedBox(height: rs(context, 30)),
               _drawerItem(Icons.home, "Home", AppPage.home),
-              SizedBox(height: rs(context, 15)),
+              SizedBox(height: rs(context, 12)),
               _drawerItem(Icons.bar_chart, "Statistics", AppPage.statistics),
-              SizedBox(height: rs(context, 15)),
+              SizedBox(height: rs(context, 12)),
               _drawerItem(
                 Icons.person_search_rounded,
                 "Account Status",
                 AppPage.accountStatus,
               ),
 
-              SizedBox(height: rs(context, 15)),
+              SizedBox(height: rs(context, 12)),
               _drawerItem(
                 Icons.manage_accounts,
                 "Account Settings",
                 AppPage.accountSettings,
               ),
-              SizedBox(height: rs(context, 15)),
+              SizedBox(height: rs(context, 12)),
               _drawerItem(
                 Icons.settings,
                 "Page Settings",
@@ -202,8 +203,8 @@ class _MainShellState extends State<MainShell> {
                 child: ListTile(
                   leading: Icon(
                     Icons.logout,
-                    color: Colors.white,
-                    size: rs(context, 35),
+                    color: Colors.white70,
+                    size: rs(context, 25),
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -248,7 +249,7 @@ class _MainShellState extends State<MainShell> {
         leading: Icon(
           icon,
           color: isActive ? Colors.yellow : Colors.white70,
-          size: rs(context, 35),
+          size: rs(context, 25),
         ),
         title: Padding(
           padding: EdgeInsets.only(top: rs(context, 5)),
@@ -257,7 +258,7 @@ class _MainShellState extends State<MainShell> {
             style: TextStyle(
               color: isActive ? Colors.yellow : Colors.white70,
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-              fontSize: rs(context, 18),
+              fontSize: rs(context, 15),
             ),
           ),
         ),
@@ -324,7 +325,7 @@ Widget _actionButton({required IconData icon, required VoidCallback onTap}) {
           ],
         ),
         child: IconButton(
-          icon: Icon(icon, color: Colors.black87, size: rs(context, 22)),
+          icon: Icon(icon, color: Colors.black87, size: rs(context, 18)),
           onPressed: onTap,
         ),
       );
