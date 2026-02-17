@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:popcom/auth/auth_service.dart';
 import 'dart:math';
 import '../service/google_register_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 double rs(BuildContext context, double size) {
   final width = MediaQuery.of(context).size.width;
@@ -30,6 +33,8 @@ class _LoginPageState extends State<LoginPage>
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  late final StreamSubscription<AuthState> _authSub;
+
   // animation controller
   late AnimationController _controller;
 
@@ -43,15 +48,46 @@ class _LoginPageState extends State<LoginPage>
       vsync: this,
       duration: const Duration(seconds: 10),
     )..repeat();
+    _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((
+      event,
+    ) async {
+      final session = event.session;
+      if (session == null) return;
+    });
   }
 
   @override
   void dispose() {
+    _lastNameController.dispose();
+    _firstNameController.dispose();
     _emailController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
+    _authSub.cancel();
     _controller.dispose();
     super.dispose();
+  }
+
+  bool _setupDialogShown = false;
+
+  Future<void> _checkIfNeedsSetup() async {
+    if (_setupDialogShown) return;
+
+    await Supabase.instance.client.auth.refreshSession();
+
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+
+    final meta = user.userMetadata ?? {};
+    final username = (meta['username'] ?? '').toString().trim();
+    final hasPassword = meta['has_site_password'] ?? false;
+
+    if (username.isEmpty || !hasPassword) {
+      _setupDialogShown = true;
+
+      if (!mounted) return;
+      await showSetupUsernamePasswordDialog(context);
+    }
   }
 
   // login button pressed
@@ -677,13 +713,27 @@ class _LoginPageState extends State<LoginPage>
                                       ),
 
                                       OutlinedButton.icon(
-                                        onPressed: () {
-                                          // insert google sign up function here
-                                          authService.signInWithGoogle();
-                                          showSetupUsernamePasswordDialog(
-                                            context,
-                                          );
-                                        },
+                                        onPressed: _loading
+                                            ? null
+                                            : () async {
+                                                setState(() => _loading = true);
+                                                try {
+                                                  await authService
+                                                      .signInWithGoogle();
+                                                  // DO NOT call _checkIfNeedsSetup() here.
+                                                  // onAuthStateChange will handle it after session exists.
+                                                } catch (e) {
+                                                  _showSnack(
+                                                    "Google sign-in failed.\n$e",
+                                                  );
+                                                } finally {
+                                                  if (mounted) {
+                                                    setState(
+                                                      () => _loading = false,
+                                                    );
+                                                  }
+                                                }
+                                              },
                                         icon: Image.asset(
                                           'lib/assets/images/google logo.png',
                                           height: rs(context, 20),

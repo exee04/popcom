@@ -30,9 +30,11 @@ class AuthService {
     _supabase.auth.onAuthStateChange.listen((data) {
       print('AUTH EVENT: ${data.event}');
     });
-    await Supabase.instance.client.auth.signInWithOAuth(
+    await _supabase.auth.signInWithOAuth(
       OAuthProvider.google,
       redirectTo: 'com.popcom.app://login-callback',
+      authScreenLaunchMode: LaunchMode.externalApplication,
+      queryParams: {'prompt': 'select_account'},
     );
   }
 
