@@ -133,7 +133,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                         },
                       ),
                     SizedBox(width: rs(context, 8)),
-                    _actionButton(
+                    _saveEditButton(
                       label: _isEditing ? "Save" : "Edit",
                       onTap: () {
                         setState(() {
@@ -244,8 +244,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     );
   }
 
-  // reusable button template
-  Widget _actionButton({required String label, required VoidCallback onTap}) {
+  Widget _saveEditButton({required String label, required VoidCallback onTap}) {
     return Builder(
       builder: (context) {
         return Container(

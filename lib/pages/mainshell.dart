@@ -3,7 +3,7 @@ import 'package:popcom/auth/auth_service.dart';
 import 'package:popcom/pages/account_settings_page.dart';
 import 'package:popcom/pages/account_status_page.dart';
 import 'package:popcom/pages/home_page.dart';
-import 'package:popcom/pages/page_settings_page.dart';
+import 'package:popcom/pages/store_profile_page.dart';
 import 'package:popcom/pages/reviews_page.dart';
 import 'dart:ui';
 import 'package:popcom/pages/statistics_page.dart';
@@ -17,7 +17,7 @@ enum AppPage {
   home,
   statistics,
   accountStatus,
-  pageSettings,
+  storeProfile,
   accountSettings,
   reviews,
 }
@@ -94,10 +94,10 @@ class _MainShellState extends State<MainShell> {
             ),
           ),
         );
-      case AppPage.pageSettings:
+      case AppPage.storeProfile:
         return Center(
           child: Text(
-            "Page Settings",
+            "Store Profile",
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.black87,
@@ -117,7 +117,7 @@ class _MainShellState extends State<MainShell> {
     AppPage.accountStatus: const AccountStatusPage(
       key: ValueKey('accountStatus'),
     ),
-    AppPage.pageSettings: const PageSettingsPage(key: ValueKey('pageSettings')),
+    AppPage.storeProfile: const StoreProfilePage(key: ValueKey('storeProfile')),
     AppPage.accountSettings: const AccountSettingsPage(
       key: ValueKey('accountSettings'),
     ),
@@ -214,9 +214,9 @@ class _MainShellState extends State<MainShell> {
               ),
               SizedBox(height: rs(context, 12)),
               _drawerItem(
-                Icons.settings,
-                "Page Settings",
-                AppPage.pageSettings,
+                Icons.storefront_sharp,
+                "Store Profile",
+                AppPage.storeProfile,
               ),
               const Spacer(),
 

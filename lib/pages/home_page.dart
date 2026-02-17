@@ -9,6 +9,8 @@ double rs(BuildContext context, double size) {
   return size * (width / 375).clamp(0.9, 1.2);
 }
 
+const double _modalInputHeight = 38;
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
   @override
@@ -408,7 +410,7 @@ void _showAddItemModal(BuildContext context) {
             child: Container(
               padding: EdgeInsets.all(rs(context, 16)),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.75),
+                color: Color(0xFFDC143C).withOpacity(0.9),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Colors.white.withOpacity(0.6)),
               ),
@@ -419,14 +421,40 @@ void _showAddItemModal(BuildContext context) {
                     _modalHeader(context),
                     SizedBox(height: rs(context, 12)),
 
-                    _modalInput(context, "Item Name"),
-                    _manufacturerDropdown(context, "Manufacturer"),
-                    _ipDropdown(context, "Intellectual Property"),
+                    _labeledField(
+                      context: context,
+                      label: "Item Name",
 
-                    _modalTextArea(context, "Item Description"),
+                      child: _modalInput(context, "Enter Item Name"),
+                    ),
+                    _labeledField(
+                      context: context,
+                      label: "Manufacturer",
+                      child: _manufacturerDropdown(context, "Manufacturer"),
+                    ),
+                    _labeledField(
+                      context: context,
+                      label: "Intellectual Property",
+                      child: _ipDropdown(context, "Intellectual Property"),
+                    ),
 
-                    _modalInput(context, "Image URL"),
-                    _uploadButton(context),
+                    _labeledField(
+                      context: context,
+                      label: "Item Description",
+                      child: _modalTextArea(context, "Item Description"),
+                    ),
+
+                    _labeledField(
+                      context: context,
+                      label: "Image URL",
+                      child: _modalInput(context, "Image URL"),
+                    ),
+
+                    _labeledField(
+                      context: context,
+                      label: "Image File",
+                      child: _uploadButton(context),
+                    ),
 
                     SizedBox(height: rs(context, 12)),
 
@@ -451,12 +479,23 @@ void _showAddItemModal(BuildContext context) {
                     ),
                     SizedBox(height: rs(context, 12)),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                    Column(
                       children: [
-                        _cancelModalButton(context),
-                        SizedBox(width: rs(context, 10)),
-                        _saveModalButton(context),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            _cancelModalButton(
+                              onTap: () => Navigator.pop(context),
+                            ),
+                            SizedBox(width: rs(context, 10)),
+                            _saveModalButton(
+                              onTap: () {
+                                print("Save pressed");
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: rs(context, 16)),
                       ],
                     ),
                   ],
@@ -472,8 +511,12 @@ void _showAddItemModal(BuildContext context) {
 
 Widget _modalHeader(BuildContext context) {
   return Text(
-    "Add Item",
-    style: TextStyle(fontSize: rs(context, 18), fontWeight: FontWeight.w500),
+    "Add New Item",
+    style: TextStyle(
+      fontSize: rs(context, 18),
+      fontWeight: FontWeight.w500,
+      color: Colors.white.withAlpha(240),
+    ),
   );
 }
 
@@ -492,12 +535,12 @@ Widget _modalInput(
           contentPadding: EdgeInsetsDirectional.all(rs(context, 8)),
           hintText: hint,
           filled: true,
-          fillColor: Colors.white70,
+          fillColor: Colors.white,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide(color: Colors.yellow.shade700, width: 2),
-          ),      
+          ),
         ),
         style: TextStyle(fontSize: rs(context, 13)),
       ),
@@ -505,21 +548,54 @@ Widget _modalInput(
   );
 }
 
+Widget _labeledField({
+  required BuildContext context,
+  required String label,
+  required Widget child,
+}) {
+  return Padding(
+    padding: EdgeInsets.only(bottom: rs(context, 12), top: rs(context, 8)),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: rs(context, 12),
+            fontWeight: FontWeight.w500,
+            color: Colors.white.withOpacity(0.9),
+          ),
+        ),
+        SizedBox(height: rs(context, 6)),
+        child,
+      ],
+    ),
+  );
+}
+
 Widget _manufacturerDropdown(BuildContext context, String hint) {
   return Padding(
     padding: EdgeInsets.only(bottom: rs(context, 12)),
-    child: DropdownButtonFormField<String>(
-      decoration: InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+    child: SizedBox(
+      height: rs(context, _modalInputHeight),
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration(
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: rs(context, 8),
+            vertical: rs(context, 10),
+          ),
+          hintText: hint,
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        style: TextStyle(fontSize: rs(context, 13), color: Colors.black),
+        items: const [
+          DropdownMenuItem(value: "Option 1", child: Text("Option 1")),
+          DropdownMenuItem(value: "Option 2", child: Text("Option 2")),
+        ],
+        onChanged: (value) {},
       ),
-      items: const [
-        DropdownMenuItem(value: "Option 1", child: Text("Option 1")),
-        DropdownMenuItem(value: "Option 2", child: Text("Option 2")),
-      ],
-      onChanged: (value) {},
     ),
   );
 }
@@ -527,18 +603,26 @@ Widget _manufacturerDropdown(BuildContext context, String hint) {
 Widget _ipDropdown(BuildContext context, String hint) {
   return Padding(
     padding: EdgeInsets.only(bottom: rs(context, 12)),
-    child: DropdownButtonFormField<String>(
-      decoration: InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+    child: SizedBox(
+      height: rs(context, _modalInputHeight),
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration(
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: rs(context, 8),
+            vertical: rs(context, 10),
+          ),
+          hintText: hint,
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        style: TextStyle(fontSize: rs(context, 13), color: Colors.black),
+        items: const [
+          DropdownMenuItem(value: "Option 1", child: Text("Option 1")),
+          DropdownMenuItem(value: "Option 2", child: Text("Option 2")),
+        ],
+        onChanged: (value) {},
       ),
-      items: const [
-        DropdownMenuItem(value: "Option 1", child: Text("Option 1")),
-        DropdownMenuItem(value: "Option 2", child: Text("Option 2")),
-      ],
-      onChanged: (value) {},
     ),
   );
 }
@@ -554,6 +638,7 @@ Widget _modalTextArea(BuildContext context, String hint) {
         fillColor: Colors.white,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
       ),
+      style: TextStyle(fontSize: rs(context, 13)),
     ),
   );
 }
@@ -561,33 +646,103 @@ Widget _modalTextArea(BuildContext context, String hint) {
 Widget _uploadButton(BuildContext context) {
   return Padding(
     padding: EdgeInsets.only(bottom: rs(context, 12)),
-    child: OutlinedButton.icon(
-      onPressed: () {
-        // image picker functionality to be implemented
-      },
-      icon: const Icon(Icons.upload),
-      label: const Text("Upload Image"),
+    child: Center(
+      child: OutlinedButton.icon(
+        onPressed: () {},
+        icon: const Icon(Icons.upload),
+        label: const Text("Upload Image"),
+        style: OutlinedButton.styleFrom(
+          minimumSize: Size(rs(context, 150), rs(context, 38)),
+
+          side: BorderSide(color: Colors.white, width: 1.5),
+
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          foregroundColor: Colors.white,
+          textStyle: TextStyle(
+            fontSize: rs(context, 11),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
     ),
   );
 }
 
-Widget _cancelModalButton(BuildContext context) {
-  return ElevatedButton(
-    onPressed: () => Navigator.pop(context),
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.redAccent,
-      foregroundColor: Colors.white,
-    ),
-    child: const Text("Cancel"),
-  );
-}
-
-Widget _saveModalButton(BuildContext context) {
-  return ElevatedButton(
-    onPressed: () {
-      // save functionality to be implemented
-      Navigator.pop(context);
+Widget _cancelModalButton({required VoidCallback onTap}) {
+  return Builder(
+    builder: (context) {
+      return Container(
+        height: rs(context, 35),
+        decoration: BoxDecoration(
+          color: Colors.redAccent.withOpacity(0.85),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.black87),
+          boxShadow: const [
+            BoxShadow(color: Colors.black, offset: Offset(0, 4)),
+          ],
+        ),
+        child: ElevatedButton(
+          onPressed: onTap,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF4B33).withOpacity(0.85),
+            foregroundColor: Colors.white,
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Colors.black87),
+            ),
+            padding: EdgeInsets.symmetric(horizontal: rs(context, 18)),
+          ),
+          child: Text(
+            "Cancel",
+            style: TextStyle(
+              fontSize: rs(context, 13),
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      );
     },
-    child: const Text("Save"),
+  );
+}
+
+Widget _saveModalButton({required VoidCallback onTap}) {
+  return Builder(
+    builder: (context) {
+      return Container(
+        height: rs(context, 35),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFDC62D).withOpacity(0.85),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.black87),
+          boxShadow: const [
+            BoxShadow(color: Colors.black, offset: Offset(0, 4)),
+          ],
+        ),
+        child: ElevatedButton(
+          onPressed: onTap,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFFDC62D).withOpacity(0.85),
+            foregroundColor: Colors.black87,
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Colors.black87),
+            ),
+            padding: EdgeInsets.symmetric(horizontal: rs(context, 18)),
+          ),
+          child: Text(
+            "Save",
+            style: TextStyle(
+              fontSize: rs(context, 13),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      );
+    },
   );
 }
