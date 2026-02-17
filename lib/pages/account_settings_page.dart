@@ -20,6 +20,25 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   final _addressController = TextEditingController();
   final _mobileNumController = TextEditingController();
   final _emailController = TextEditingController();
+  final _bankorEwalletController = TextEditingController();
+
+  bool _isEditing = false;
+  late Map<TextEditingController, String> _initialValues;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _initialValues = {
+      _shelfNameController: "",
+      _firstNameController: "",
+      _lastNameController: "",
+      _addressController: "",
+      _mobileNumController: "",
+      _emailController: "",
+      _bankorEwalletController: "",
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +104,53 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 _label("E-Mail Address"),
                 SizedBox(height: rs(context, 8)),
                 _input(_emailController, "E-Mail Address"),
+
+                SizedBox(height: rs(context, 25)),
+
+                // PAYOUT DETAILS
+                _sectionHeader(
+                  icon: Icons.payment_sharp,
+                  title: "PAYOUT DETAILS",
+                ),
+                _label("Bank or E-Wallet Info"),
+                SizedBox(height: rs(context, 8)),
+                _input(_bankorEwalletController, "Bank or E-Wallet Info"),
+
+                SizedBox(height: rs(context, 25)),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (_isEditing)
+                      _cancelButton(
+                        onTap: () {
+                          setState(() {
+                            for (final entry in _initialValues.entries) {
+                              entry.key.text = entry.value;
+                            }
+                            _isEditing = false;
+                          });
+                        },
+                      ),
+                    SizedBox(width: rs(context, 8)),
+                    _actionButton(
+                      label: _isEditing ? "Save" : "Edit",
+                      onTap: () {
+                        setState(() {
+                          if (!_isEditing) {
+                            for (final controller in _initialValues.keys) {
+                              _initialValues[controller] = controller.text;
+                            }
+                            _isEditing = true;
+                          } else {
+                            _isEditing = false;
+                            debugPrint("Saved!");
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
 
                 SizedBox(height: rs(context, 40)),
               ],
@@ -155,6 +221,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         textAlign: TextAlign.left,
         style: TextStyle(fontSize: rs(context, 12)),
         controller: controller,
+        enabled: _isEditing,
         decoration: InputDecoration(
           contentPadding: EdgeInsets.symmetric(
             vertical: rs(context, 10),
@@ -176,4 +243,82 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       ),
     );
   }
+
+  // reusable button template
+  Widget _actionButton({required String label, required VoidCallback onTap}) {
+    return Builder(
+      builder: (context) {
+        return Container(
+          height: rs(context, 35),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFDC62D).withOpacity(0.85),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.black87),
+            boxShadow: const [
+              BoxShadow(color: Colors.black, offset: Offset(0, 4)),
+            ],
+          ),
+          child: ElevatedButton(
+            onPressed: onTap,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFDC62D).withOpacity(0.85),
+              foregroundColor: Colors.black87,
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: const BorderSide(color: Colors.black87),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: rs(context, 18)),
+            ),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: rs(context, 13),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+Widget _cancelButton({required VoidCallback onTap}) {
+  return Builder(
+    builder: (context) {
+      return Container(
+        height: rs(context, 35),
+        decoration: BoxDecoration(
+          color: Colors.redAccent.withOpacity(0.85),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.black87),
+          boxShadow: const [
+            BoxShadow(color: Colors.black, offset: Offset(0, 4)),
+          ],
+        ),
+        child: ElevatedButton(
+          onPressed: onTap,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF4B33).withOpacity(0.85),
+            foregroundColor: Colors.white,
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Colors.black87),
+            ),
+            padding: EdgeInsets.symmetric(horizontal: rs(context, 18)),
+          ),
+          child: Text(
+            "Cancel",
+            style: TextStyle(
+              fontSize: rs(context, 13),
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }

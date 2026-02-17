@@ -4,6 +4,7 @@ import 'package:popcom/pages/account_settings_page.dart';
 import 'package:popcom/pages/account_status_page.dart';
 import 'package:popcom/pages/home_page.dart';
 import 'package:popcom/pages/page_settings_page.dart';
+import 'package:popcom/pages/reviews_page.dart';
 import 'dart:ui';
 import 'package:popcom/pages/statistics_page.dart';
 
@@ -12,7 +13,14 @@ double rs(BuildContext context, double size) {
   return size * (width / 375).clamp(0.9, 1.2);
 }
 
-enum AppPage { home, statistics, accountStatus, pageSettings, accountSettings }
+enum AppPage {
+  home,
+  statistics,
+  accountStatus,
+  pageSettings,
+  accountSettings,
+  reviews,
+}
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -44,6 +52,18 @@ class _MainShellState extends State<MainShell> {
         return Center(
           child: Text(
             "Statistics",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: rs(context, 18),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+      case AppPage.reviews:
+        return Center(
+          child: Text(
+            "My Reviews",
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.black87,
@@ -93,6 +113,7 @@ class _MainShellState extends State<MainShell> {
   final Map<AppPage, Widget> pages = {
     AppPage.home: const HomePage(key: ValueKey('home')),
     AppPage.statistics: const StatisticsPage(key: ValueKey('statistics')),
+    AppPage.reviews: const ReviewsPage(key: ValueKey('reviews')),
     AppPage.accountStatus: const AccountStatusPage(
       key: ValueKey('accountStatus'),
     ),
@@ -164,7 +185,7 @@ class _MainShellState extends State<MainShell> {
       // side menu drawer
       endDrawer: Drawer(
         child: Container(
-          color: Colors.red.shade500,
+          color: Color(0xFFDC143C).withOpacity(0.9),
           child: Column(
             children: [
               Image.asset(
@@ -176,6 +197,8 @@ class _MainShellState extends State<MainShell> {
               _drawerItem(Icons.home, "Home", AppPage.home),
               SizedBox(height: rs(context, 12)),
               _drawerItem(Icons.bar_chart, "Statistics", AppPage.statistics),
+              SizedBox(height: rs(context, 12)),
+              _drawerItem(Icons.star_rate_sharp, "My Reviews", AppPage.reviews),
               SizedBox(height: rs(context, 12)),
               _drawerItem(
                 Icons.person_search_rounded,

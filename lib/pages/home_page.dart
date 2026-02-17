@@ -113,42 +113,19 @@ class _HomePageState extends State<HomePage> {
             height: rs(context, 40),
             child: Row(
               children: [
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    elevation: 5,
-                    shadowColor: Colors.black45,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    "Add Item",
-                    style: TextStyle(
-                      fontSize: rs(context, 12),
-                      color: Colors.black87,
-                    ),
-                  ),
+                _textButton(
+                  label: "Add Item",
+                  onTap: () {
+                    _showAddItemModal(context);
+                    print("Add Item pressed");
+                  },
                 ),
                 SizedBox(width: rs(context, 15)),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    elevation: 5,
-                    shadowColor: Colors.black45,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    "Pull Out",
-                    style: TextStyle(
-                      fontSize: rs(context, 12),
-                      color: Colors.black87,
-                    ),
-                  ),
+                _textButton(
+                  label: "Pull Out",
+                  onTap: () {
+                    print("Pull Out pressed");
+                  },
                 ),
               ],
             ),
@@ -169,7 +146,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// reusable button template
+// reusable icon button template
 Widget _actionButton({required IconData icon, required VoidCallback onTap}) {
   return Builder(
     builder: (context) {
@@ -187,6 +164,45 @@ Widget _actionButton({required IconData icon, required VoidCallback onTap}) {
         child: IconButton(
           icon: Icon(icon, color: Colors.black87, size: rs(context, 18)),
           onPressed: onTap,
+        ),
+      );
+    },
+  );
+}
+
+// reusable text button template
+Widget _textButton({required String label, required VoidCallback onTap}) {
+  return Builder(
+    builder: (context) {
+      return Container(
+        height: rs(context, 35),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFDC62D).withOpacity(0.85),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.black87),
+          boxShadow: const [
+            BoxShadow(color: Colors.black, offset: Offset(0, 4)),
+          ],
+        ),
+        child: ElevatedButton(
+          onPressed: onTap,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFFDC62D).withOpacity(0.85),
+            foregroundColor: Colors.black87,
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Colors.black87),
+            ),
+            padding: EdgeInsets.symmetric(horizontal: rs(context, 18)),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: rs(context, 13),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       );
     },
@@ -336,5 +352,207 @@ Widget glassPanel(BuildContext context, {required Widget child}) {
         child: child,
       ),
     ),
+  );
+}
+
+void _showAddItemModal(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    builder: (context) {
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.symmetric(
+          horizontal: rs(context, 16),
+          vertical: rs(context, 24),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+            child: Container(
+              padding: EdgeInsets.all(rs(context, 16)),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.75),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white.withOpacity(0.6)),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _modalHeader(context),
+                    SizedBox(height: rs(context, 12)),
+
+                    _modalInput(context, "Item Name"),
+                    _manufacturerDropdown(context, "Manufacturer"),
+                    _ipDropdown(context, "Intellectual Property"),
+
+                    _modalTextArea(context, "Item Description"),
+
+                    _modalInput(context, "Image URL"),
+                    _uploadButton(context),
+
+                    SizedBox(height: rs(context, 12)),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _modalInput(
+                            context,
+                            "Quantity",
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                        SizedBox(width: rs(context, 5)),
+                        Expanded(
+                          child: _modalInput(
+                            context,
+                            "Price",
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: rs(context, 12)),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        _cancelModalButton(context),
+                        SizedBox(width: rs(context, 10)),
+                        _saveModalButton(context),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+Widget _modalHeader(BuildContext context) {
+  return Text(
+    "Add Item",
+    style: TextStyle(fontSize: rs(context, 18), fontWeight: FontWeight.w500),
+  );
+}
+
+Widget _modalInput(
+  BuildContext context,
+  String hint, {
+  TextInputType keyboardType = TextInputType.text,
+}) {
+  return Padding(
+    padding: EdgeInsets.only(bottom: rs(context, 12)),
+    child: SizedBox(
+      height: rs(context, 38),
+      child: TextField(
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          contentPadding: EdgeInsetsDirectional.all(rs(context, 8)),
+          hintText: hint,
+          filled: true,
+          fillColor: Colors.white70,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.yellow.shade700, width: 2),
+          ),      
+        ),
+        style: TextStyle(fontSize: rs(context, 13)),
+      ),
+    ),
+  );
+}
+
+Widget _manufacturerDropdown(BuildContext context, String hint) {
+  return Padding(
+    padding: EdgeInsets.only(bottom: rs(context, 12)),
+    child: DropdownButtonFormField<String>(
+      decoration: InputDecoration(
+        hintText: hint,
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      items: const [
+        DropdownMenuItem(value: "Option 1", child: Text("Option 1")),
+        DropdownMenuItem(value: "Option 2", child: Text("Option 2")),
+      ],
+      onChanged: (value) {},
+    ),
+  );
+}
+
+Widget _ipDropdown(BuildContext context, String hint) {
+  return Padding(
+    padding: EdgeInsets.only(bottom: rs(context, 12)),
+    child: DropdownButtonFormField<String>(
+      decoration: InputDecoration(
+        hintText: hint,
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      items: const [
+        DropdownMenuItem(value: "Option 1", child: Text("Option 1")),
+        DropdownMenuItem(value: "Option 2", child: Text("Option 2")),
+      ],
+      onChanged: (value) {},
+    ),
+  );
+}
+
+Widget _modalTextArea(BuildContext context, String hint) {
+  return Padding(
+    padding: EdgeInsets.only(bottom: rs(context, 12)),
+    child: TextField(
+      maxLines: 4,
+      decoration: InputDecoration(
+        hintText: hint,
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    ),
+  );
+}
+
+Widget _uploadButton(BuildContext context) {
+  return Padding(
+    padding: EdgeInsets.only(bottom: rs(context, 12)),
+    child: OutlinedButton.icon(
+      onPressed: () {
+        // image picker functionality to be implemented
+      },
+      icon: const Icon(Icons.upload),
+      label: const Text("Upload Image"),
+    ),
+  );
+}
+
+Widget _cancelModalButton(BuildContext context) {
+  return ElevatedButton(
+    onPressed: () => Navigator.pop(context),
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.redAccent,
+      foregroundColor: Colors.white,
+    ),
+    child: const Text("Cancel"),
+  );
+}
+
+Widget _saveModalButton(BuildContext context) {
+  return ElevatedButton(
+    onPressed: () {
+      // save functionality to be implemented
+      Navigator.pop(context);
+    },
+    child: const Text("Save"),
   );
 }
