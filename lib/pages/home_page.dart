@@ -1,5 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:popcom/models/item.dart';
+import 'package:popcom/service/item_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 double rs(BuildContext context, double size) {
   final width = MediaQuery.of(context).size.width;
@@ -8,15 +11,47 @@ double rs(BuildContext context, double size) {
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  final _supabase = Supabase.instance.client;
   final _searchController = TextEditingController();
+  final ItemService _itemService = ItemService();
+  late Future<List<Item>> _itemsFuture;
 
   bool _isGrid = true;
+  @override
+  void initState() {
+    super.initState();
+    _itemsFuture = _itemService.fetchItems(); // async
+    _itemsFuture = _supabase
+        .from('Item') // lowercase table name
+        .select(
+          '*, category:Categories(category_name)',
+        ) // lowercase table and relationship
+        .then((response) {
+          final data = response as List<dynamic>;
+          return data
+              .map((e) => Item.fromMap(e as Map<String, dynamic>))
+              .toList();
+        });
+    _itemsFuture
+        .then((items) {
+          print("Fetched ${items.length} items:");
+          for (var item in items) {
+            print(item); // This will call the toString method of Item
+          }
+        })
+        .catchError((error) {
+          print("Error fetching items: $error");
+        });
+    print(
+      "Fetched items: $_itemsFuture",
+    ); // Debug print to check if items are fetched correctly
+    print("Successfully initialized HomePage with items future: $_itemsFuture");
+  }
 
   @override
   Widget build(BuildContext context) {

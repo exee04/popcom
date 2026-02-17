@@ -4,13 +4,37 @@ class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
   // Sign in with email and password
-  Future<AuthResponse> signInWithEmailPassword(
-    String email,
+
+  Future<AuthResponse> signInWithUsernamePassword(
+    String username,
     String password,
   ) async {
+    final email =
+        await _supabase.rpc(
+              'get_email_by_username',
+              params: {'input_username': username},
+            )
+            as String?;
+
+    if (email == null || email.isEmpty) {
+      throw Exception('User not found');
+    }
+
     return await _supabase.auth.signInWithPassword(
       email: email,
       password: password,
+    );
+  }
+
+  Future<void> signInWithGoogle() async {
+    _supabase.auth.onAuthStateChange.listen((data) {
+      print('AUTH EVENT: ${data.event}');
+    });
+    await _supabase.auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: 'com.popcom.app://login-callback',
+      authScreenLaunchMode: LaunchMode.externalApplication,
+      queryParams: {'prompt': 'select_account'},
     );
   }
 
