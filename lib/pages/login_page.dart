@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:popcom/auth/auth_service.dart';
 import 'dart:math';
+import '../service/google_register_service.dart';
 
 double rs(BuildContext context, double size) {
   final width = MediaQuery.of(context).size.width;
@@ -83,7 +84,7 @@ class _LoginPageState extends State<LoginPage>
       }
       // attempt sign in
       else {
-        await authService.signInWithEmailPassword(email, password);
+        await authService.signInWithUsernamePassword(email, password);
         _showSnack("Successfully logged in.");
       }
     } catch (e) {
@@ -678,6 +679,10 @@ class _LoginPageState extends State<LoginPage>
                                       OutlinedButton.icon(
                                         onPressed: () {
                                           // insert google sign up function here
+                                          authService.signInWithGoogle();
+                                          showSetupUsernamePasswordDialog(
+                                            context,
+                                          );
                                         },
                                         icon: Image.asset(
                                           'lib/assets/images/google logo.png',

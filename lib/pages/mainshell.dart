@@ -91,7 +91,7 @@ class _MainShellState extends State<MainShell> {
 
   AppPage currentPage = AppPage.home;
   final Map<AppPage, Widget> pages = {
-    AppPage.home: const HomePage(key: ValueKey('home')),
+    AppPage.home: HomePage(key: ValueKey('home')),
     AppPage.statistics: const StatisticsPage(key: ValueKey('statistics')),
     AppPage.accountStatus: const AccountStatusPage(
       key: ValueKey('accountStatus'),
