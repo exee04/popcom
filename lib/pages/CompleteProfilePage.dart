@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'mainshell.dart';
 
 class CompleteProfilePage extends StatefulWidget {
   final VoidCallback onProfileCreated;
