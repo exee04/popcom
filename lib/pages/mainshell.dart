@@ -1,12 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:popcom/auth/auth_service.dart';
 import 'package:popcom/pages/account_settings_page.dart';
 import 'package:popcom/pages/account_status_page.dart';
 import 'package:popcom/pages/home_page.dart';
+import 'package:popcom/pages/login_page.dart';
 import 'package:popcom/pages/store_profile_page.dart';
 import 'package:popcom/pages/reviews_page.dart';
 import 'dart:ui';
 import 'package:popcom/pages/statistics_page.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:popcom/pages/CompleteProfilePage.dart';
 
 double rs(BuildContext context, double size) {
   final width = MediaQuery.of(context).size.width;
@@ -31,6 +36,11 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   // get auth service
   final authService = AuthService();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   //logout button pressed
   void logout() async {

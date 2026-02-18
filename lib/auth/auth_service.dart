@@ -26,16 +26,23 @@ class AuthService {
     );
   }
 
+  bool _oauthInProgress = false;
+
   Future<void> signInWithGoogle() async {
-    _supabase.auth.onAuthStateChange.listen((data) {
-      print('AUTH EVENT: ${data.event}');
-    });
-    await _supabase.auth.signInWithOAuth(
-      OAuthProvider.google,
-      redirectTo: 'com.popcom.app://login-callback',
-      authScreenLaunchMode: LaunchMode.externalApplication,
-      queryParams: {'prompt': 'select_account'},
-    );
+    if (_oauthInProgress) return;
+
+    _oauthInProgress = true;
+
+    try {
+      await Supabase.instance.client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'com.popcom.app://login-callback',
+        authScreenLaunchMode: LaunchMode.externalApplication,
+        queryParams: {'prompt': 'select_account'},
+      );
+    } finally {
+      _oauthInProgress = false;
+    }
   }
 
   //Sign up with email, username, and password
