@@ -299,7 +299,7 @@ Widget _cancelButton({required VoidCallback onTap}) {
         child: ElevatedButton(
           onPressed: onTap,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF4B33).withOpacity(0.85),
+            backgroundColor: const Color(0x00ff4b33).withOpacity(0.85),
             foregroundColor: Colors.white,
             elevation: 4,
             shape: RoundedRectangleBorder(
