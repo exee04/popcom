@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:popcom/auth/auth_service.dart';
 import 'dart:math';
-import '../service/google_register_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 double rs(BuildContext context, double size) {
@@ -68,28 +67,6 @@ class _LoginPageState extends State<LoginPage>
     super.dispose();
   }
 
-  bool _setupDialogShown = false;
-
-  Future<void> _checkIfNeedsSetup() async {
-    if (_setupDialogShown) return;
-
-    await Supabase.instance.client.auth.refreshSession();
-
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return;
-
-    final meta = user.userMetadata ?? {};
-    final username = (meta['username'] ?? '').toString().trim();
-    final hasPassword = meta['has_site_password'] ?? false;
-
-    if (username.isEmpty || !hasPassword) {
-      _setupDialogShown = true;
-
-      if (!mounted) return;
-      await showSetupUsernamePasswordDialog(context);
-    }
-  }
-
   // login button pressed
   Future<void> submit() async {
     if (_loading) return;
@@ -120,7 +97,7 @@ class _LoginPageState extends State<LoginPage>
       }
       // attempt sign in
       else {
-        await authService.signInWithUsernamePassword(email, password);
+        await authService.signInWithUsernamePassword(username, password);
         _showSnack("Successfully logged in.");
       }
     } catch (e) {
@@ -717,22 +694,22 @@ class _LoginPageState extends State<LoginPage>
                                             ? null
                                             : () async {
                                                 setState(() => _loading = true);
+
                                                 try {
                                                   await authService
                                                       .signInWithGoogle();
-                                                  // DO NOT call _checkIfNeedsSetup() here.
-                                                  // onAuthStateChange will handle it after session exists.
                                                 } catch (e) {
                                                   _showSnack(
                                                     "Google sign-in failed.\n$e",
                                                   );
-                                                } finally {
                                                   if (mounted) {
                                                     setState(
                                                       () => _loading = false,
                                                     );
                                                   }
                                                 }
+
+                                                // ❌ DO NOT set loading = false here
                                               },
                                         icon: Image.asset(
                                           'lib/assets/images/google logo.png',
