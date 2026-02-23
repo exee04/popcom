@@ -9,6 +9,8 @@ double rs(BuildContext context, double size) {
   return size * (width / 375).clamp(0.9, 1.2);
 }
 
+enum ItemStatus { approved, pending, pulledOut }
+
 const double _modalInputHeight = 38;
 
 class HomePage extends StatefulWidget {
@@ -23,7 +25,224 @@ class _HomePageState extends State<HomePage> {
   final ItemService _itemService = ItemService();
   late Future<List<Item>> _itemsFuture;
 
+  ItemStatus? _selectedStatus; // For filtering, null = All
+
   bool _isGrid = true;
+
+  String _sortField = 'price'; // default sort field
+  bool _ascending = true; // default sort is ascending
+
+  // temp list for testing sort function and search function via hardcoded values
+  late List<TempItem> _allItems;
+  List<TempItem> _filteredItems = [];
+
+  // grid view widget
+  Widget _buildGridView(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final crossAxisCount = width >= 400 ? 3 : 2;
+    return GridView.builder(
+      padding: EdgeInsets.only(top: rs(context, 20), bottom: rs(context, 5)),
+      itemCount: _filteredItems.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: rs(context, 12),
+        mainAxisSpacing: rs(context, 12),
+        childAspectRatio: 0.65,
+      ),
+      itemBuilder: (context, index) {
+        return _buildGlassCard(context, _filteredItems[index]);
+      },
+    );
+  }
+
+  // list view widget
+  Widget _buildListView(BuildContext context) {
+    return ListView.separated(
+      padding: EdgeInsets.only(top: rs(context, 20), bottom: rs(context, 5)),
+      itemCount: _filteredItems.length,
+      separatorBuilder: (_, ___) => SizedBox(height: rs(context, 12)),
+      itemBuilder: (context, index) {
+        return _buildGlassCard(context, _filteredItems[index], isList: true);
+      },
+    );
+  }
+
+  // temp sort function
+  void _sortItems(String field, bool ascending) {
+    setState(() {
+      _sortField = field;
+      _ascending = ascending;
+
+      int compare(TempItem a, TempItem b) {
+        switch (field) {
+          case 'name':
+            return ascending
+                ? a.name.compareTo(b.name)
+                : b.name.compareTo(a.name);
+          case 'sku':
+            return ascending ? a.sku.compareTo(b.sku) : b.sku.compareTo(a.sku);
+          case 'price':
+            return ascending
+                ? a.price.compareTo(b.price)
+                : b.price.compareTo(a.price);
+          case 'quantity':
+            return ascending
+                ? a.quantity.compareTo(b.quantity)
+                : b.quantity.compareTo(a.quantity);
+          default:
+            return 0;
+        }
+      }
+
+      _allItems.sort(compare);
+      _filteredItems.sort(compare);
+    });
+  }
+
+  // Sort options
+  Widget _sortMenu(BuildContext context) {
+    final icon = _ascending ? Icons.arrow_upward : Icons.arrow_downward;
+
+    return Container(
+      height: rs(context, 35),
+      width: rs(context, 35),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFDC62D).withOpacity(0.85),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.black87),
+        boxShadow: const [BoxShadow(color: Colors.black, offset: Offset(0, 4))],
+      ),
+      child: PopupMenuButton<String>(
+        icon: Icon(icon, color: Colors.black87, size: rs(context, 18)),
+        onSelected: (value) {
+          final parts = value.split('_');
+          _sortItems(parts[0], parts[1] == 'asc');
+        },
+        itemBuilder: (_) => [
+          _sortItem("name", true, "Item Name (Asc)"),
+          _sortItem("name", false, "Item Name (Desc)"),
+          _sortItem("sku", true, "SKU (Asc)"),
+          _sortItem("sku", false, "SKU (Desc)"),
+          _sortItem("price", true, "Price (Asc)"),
+          _sortItem("price", false, "Price (Desc)"),
+          _sortItem("quantity", true, "Quantity (Asc)"),
+          _sortItem("quantity", false, "Quantity (Desc)"),
+        ],
+      ),
+    );
+  }
+
+  PopupMenuItem<String> _sortItem(String field, bool asc, String label) {
+    final isSelected = _sortField == field && _ascending == asc;
+
+    return PopupMenuItem<String>(
+      value: "${field}_${asc ? 'asc' : 'desc'}",
+      child: Row(
+        children: [
+          if (isSelected)
+            Icon(
+              Icons.check,
+              size: 16,
+              color: Colors.yellow.shade800.withAlpha(240),
+            )
+          else
+            const SizedBox(width: 16),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected
+                  ? Colors.yellow.shade800.withAlpha(240)
+                  : Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // filter and search function
+  void _applyFilters() {
+    final query = _searchController.text.toLowerCase();
+
+    setState(() {
+      _filteredItems = _allItems.where((item) {
+        final matchesSearch =
+            item.name.toLowerCase().contains(query) ||
+            item.sku.toLowerCase().contains(query);
+
+        final matchesStatus =
+            _selectedStatus == null || item.status == _selectedStatus;
+
+        return matchesSearch && matchesStatus;
+      }).toList();
+    });
+  }
+
+  // Filter options
+  Widget _statusFilterDropdown(BuildContext context) {
+    return Container(
+      height: rs(context, 35),
+      width: rs(context, 35),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFDC62D).withOpacity(0.85),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.black87),
+        boxShadow: const [BoxShadow(color: Colors.black, offset: Offset(0, 4))],
+      ),
+      child: PopupMenuButton<ItemStatus?>(
+        icon: Icon(
+          Icons.filter_alt,
+          size: rs(context, 18),
+          color: Colors.black87,
+        ),
+        onSelected: (value) {
+          setState(() {
+            _selectedStatus = value;
+            _applyFilters();
+          });
+        },
+        itemBuilder: (_) => [
+          _filterItem(null, "All"),
+          _filterItem(ItemStatus.approved, "Approved"),
+          _filterItem(ItemStatus.pending, "Pending Approval"),
+          _filterItem(ItemStatus.pulledOut, "Pulled Out"),
+        ],
+      ),
+    );
+  }
+
+  PopupMenuItem<ItemStatus?> _filterItem(ItemStatus? value, String label) {
+    final isSelected = _selectedStatus == value;
+
+    return PopupMenuItem<ItemStatus?>(
+      value: value,
+      child: Row(
+        children: [
+          if (isSelected)
+            Icon(
+              Icons.check,
+              size: 16,
+              color: Colors.yellow.shade800.withAlpha(240),
+            )
+          else
+            const SizedBox(width: 16),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected
+                  ? Colors.yellow.shade800.withAlpha(240)
+                  : Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +272,52 @@ class _HomePageState extends State<HomePage> {
       "Fetched items: $_itemsFuture",
     ); // Debug print to check if items are fetched correctly
     print("Successfully initialized HomePage with items future: $_itemsFuture");
+
+    // for search, sort, and filter function
+    _allItems = [
+      TempItem(
+        name: "Item A",
+        sku: "SKU-001",
+        price: 1200,
+        quantity: 10,
+        status: ItemStatus.approved,
+      ),
+      TempItem(
+        name: "Item C",
+        sku: "SKU-003",
+        price: 800,
+        quantity: 5,
+        status: ItemStatus.pending,
+      ),
+      TempItem(
+        name: "Item B",
+        sku: "SKU-002",
+        price: 1500,
+        quantity: 20,
+        status: ItemStatus.pulledOut,
+      ),
+      TempItem(
+        name: "Item D",
+        sku: "SKU-004",
+        price: 500,
+        quantity: 15,
+        status: ItemStatus.approved,
+      ),
+    ];
+
+    _filteredItems = List.from(_allItems);
+
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    _applyFilters();
   }
 
   @override
@@ -117,21 +382,12 @@ class _HomePageState extends State<HomePage> {
               SizedBox(width: rs(context, 5)),
 
               // filter button
-              _actionButton(
-                icon: Icons.filter_alt,
-                onTap: () {
-                  print("Filter pressed");
-                },
-              ),
+              _statusFilterDropdown(context),
               SizedBox(width: rs(context, 8)),
 
               // sort button
-              _actionButton(
-                icon: Icons.sort,
-                onTap: () {
-                  print("Sort pressed");
-                },
-              ),
+              _sortMenu(context),
+
               SizedBox(width: rs(context, 8)),
 
               // toggle view
@@ -246,39 +502,12 @@ Widget _textButton({required String label, required VoidCallback onTap}) {
   );
 }
 
-// grid view widget
-Widget _buildGridView(BuildContext context) {
-  final width = MediaQuery.of(context).size.width;
-  final crossAxisCount = width >= 400 ? 3 : 2;
-  return GridView.builder(
-    padding: EdgeInsets.only(top: rs(context, 20), bottom: rs(context, 5)),
-    itemCount: 10,
-    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: crossAxisCount,
-      crossAxisSpacing: rs(context, 12),
-      mainAxisSpacing: rs(context, 12),
-      childAspectRatio: 0.65,
-    ),
-    itemBuilder: (context, index) {
-      return _buildGlassCard(context, index);
-    },
-  );
-}
-
-// list view widget
-Widget _buildListView(BuildContext context) {
-  return ListView.separated(
-    padding: EdgeInsets.only(top: rs(context, 20), bottom: rs(context, 5)),
-    itemCount: 10,
-    separatorBuilder: (_, ___) => SizedBox(height: rs(context, 12)),
-    itemBuilder: (context, index) {
-      return _buildGlassCard(context, index, isList: true);
-    },
-  );
-}
-
 // Cards for items displayed
-Widget _buildGlassCard(BuildContext context, index, {bool isList = false}) {
+Widget _buildGlassCard(
+  BuildContext context,
+  TempItem item, {
+  bool isList = false,
+}) {
   return ClipRRect(
     borderRadius: BorderRadius.circular(16),
     child: BackdropFilter(
@@ -292,76 +521,98 @@ Widget _buildGlassCard(BuildContext context, index, {bool isList = false}) {
           border: Border.all(color: Colors.white.withOpacity(0.4)),
         ),
         child: isList
-            ? Row(
-                // List view
+            ?
+              // list view
+              Row(
                 children: [
-                  Container(
+                  _previewImage(
+                    context,
+                    imagePath: "lib/assets/images/popcom logo.png",
                     width: rs(context, 80),
                     height: rs(context, 80),
-                    decoration: BoxDecoration(
-                      // Change to image file if already available
-                      color: Colors.white.withOpacity(0.4),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                   ),
                   SizedBox(width: rs(context, 12)),
-
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: rs(context, 12)),
+                      SizedBox(height: rs(context, 30)),
                       Text(
-                        "Item Name", // change item name here
+                        item.name,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: rs(context, 14),
                         ),
                       ),
+                      SizedBox(height: rs(context, 5)),
+                      _skuBadge(context, item.sku),
+                    ],
+                  ),
+                  const Spacer(),
+                  Column(
+                    children: [
+                      SizedBox(height: rs(context, 30)),
                       Text(
-                        "SKU: ", // change SKU here
-                        style: TextStyle(fontSize: rs(context, 13)),
-                        textAlign: TextAlign.left,
+                        "₱${item.price.toStringAsFixed(0)}",
+                        style: TextStyle(
+                          fontSize: rs(context, 13),
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFFDC143C),
+                        ),
                       ),
+                      SizedBox(height: rs(context, 5)),
                       Text(
-                        "Qty: ", // change Qty here
+                        "Qty: ${item.quantity}",
                         style: TextStyle(fontSize: rs(context, 13)),
                       ),
                     ],
                   ),
-                  SizedBox(width: rs(context, 12)),
                 ],
               )
-            : Column(
-                // Grid view
+            :
+              // grid view
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        // Change to image file if already available
-                        color: Colors.white.withOpacity(0.4),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                    child: _previewImage(
+                      context,
+                      imagePath: "lib/assets/images/popcom logo.png",
                     ),
                   ),
                   SizedBox(height: rs(context, 8)),
-                  Text(
-                    "Item Name", // change item name here
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: rs(context, 15),
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        item.name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: rs(context, 15),
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        "₱${item.price.toStringAsFixed(0)}",
+                        style: TextStyle(
+                          fontSize: rs(context, 13),
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFFDC143C),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: rs(context, 5)),
+                  Row(
+                    children: [
+                      _skuBadge(context, item.sku),
+                      const Spacer(),
+                      Text(
+                        "Qty: ${item.quantity}",
+                        style: TextStyle(fontSize: rs(context, 13)),
+                      ),
+                    ],
                   ),
                   SizedBox(height: rs(context, 5)),
-                  Text(
-                    "SKU: ", // change SKU here
-                    style: TextStyle(fontSize: rs(context, 13)),
-                  ),
-                  SizedBox(height: rs(context, 5)),
-                  Text(
-                    "Qty: ", // change Qty here
-                    style: TextStyle(fontSize: rs(context, 13)),
-                  ),
                 ],
               ),
       ),
@@ -389,6 +640,106 @@ Widget glassPanel(BuildContext context, {required Widget child}) {
         child: child,
       ),
     ),
+  );
+}
+
+Widget _skuBadge(BuildContext context, String sku) {
+  return Container(
+    padding: EdgeInsets.symmetric(
+      horizontal: rs(context, 8),
+      vertical: rs(context, 3),
+    ),
+    decoration: BoxDecoration(
+      color: const Color(0xFFFDC62D), // yellow background
+      borderRadius: BorderRadius.circular(6),
+      border: Border.all(color: Colors.black, width: 1),
+    ),
+    child: Text(
+      sku,
+      style: TextStyle(
+        fontSize: rs(context, 11),
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
+      ),
+    ),
+  );
+}
+
+Widget _previewImage(
+  BuildContext context, {
+  required String imagePath,
+  double? width,
+  double? height,
+}) {
+  final isNetwork = imagePath.startsWith('http');
+
+  return GestureDetector(
+    onTap: () => _showImagePreview(context, imagePath),
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: isNetwork
+            ? Image.network(
+                imagePath,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return const Center(child: CircularProgressIndicator());
+                },
+                errorBuilder: (_, __, ___) =>
+                    const Icon(Icons.broken_image, size: 32),
+              )
+            : Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) =>
+                    const Icon(Icons.broken_image, size: 32),
+              ),
+      ),
+    ),
+  );
+}
+
+void _showImagePreview(BuildContext context, String imagePath) {
+  final isNetwork = imagePath.startsWith('http');
+
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    builder: (_) {
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.all(rs(context, 16)),
+        child: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.85),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: InteractiveViewer(
+                  minScale: 0.8,
+                  maxScale: 4,
+                  child: isNetwork
+                      ? Image.network(imagePath, fit: BoxFit.contain)
+                      : Image.asset(imagePath, fit: BoxFit.contain),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    },
   );
 }
 
@@ -686,7 +1037,7 @@ Widget _cancelModalButton({required VoidCallback onTap}) {
         child: ElevatedButton(
           onPressed: onTap,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF4B33).withOpacity(0.85),
+            backgroundColor: const Color(0x00ff4b33).withOpacity(0.85),
             foregroundColor: Colors.white,
             elevation: 4,
             shape: RoundedRectangleBorder(
@@ -745,4 +1096,21 @@ Widget _saveModalButton({required VoidCallback onTap}) {
       );
     },
   );
+}
+
+// class for testing sort function via hardcoded values
+class TempItem {
+  final String name;
+  final String sku;
+  final double price;
+  final int quantity;
+  final ItemStatus status;
+
+  TempItem({
+    required this.name,
+    required this.sku,
+    required this.price,
+    required this.quantity,
+    required this.status,
+  });
 }
