@@ -1,7 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:popcom/models/item.dart';
+import 'package:popcom/pages/item_view_page.dart';
 import 'package:popcom/service/item_service.dart';
+import 'package:popcom/widget/add_item_modal.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 double rs(BuildContext context, double size) {
@@ -10,8 +12,6 @@ double rs(BuildContext context, double size) {
 }
 
 enum ItemStatus { approved, pending, pulledOut }
-
-const double _modalInputHeight = 38;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -38,19 +38,37 @@ class _HomePageState extends State<HomePage> {
 
   // grid view widget
   Widget _buildGridView(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final crossAxisCount = width >= 400 ? 3 : 2;
-    return GridView.builder(
-      padding: EdgeInsets.only(top: rs(context, 20), bottom: rs(context, 5)),
-      itemCount: _filteredItems.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        crossAxisSpacing: rs(context, 12),
-        mainAxisSpacing: rs(context, 12),
-        childAspectRatio: 0.65,
-      ),
-      itemBuilder: (context, index) {
-        return _buildGlassCard(context, _filteredItems[index]);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+
+        final crossAxisCount = width < 600 ? 2 : 3;
+
+        return GridView.builder(
+          padding: EdgeInsets.only(
+            top: rs(context, 20),
+            bottom: rs(context, 5),
+          ),
+          itemCount: _filteredItems.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: rs(context, 12),
+            mainAxisSpacing: rs(context, 12),
+            childAspectRatio: crossAxisCount == 2 ? 0.72 : 0.62,
+          ),
+          itemBuilder: (context, index) {
+            final item = _filteredItems[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ItemViewPage(item: item)),
+                );
+              },
+              child: _itemCard(context, item),
+            );
+          },
+        );
       },
     );
   }
@@ -62,7 +80,16 @@ class _HomePageState extends State<HomePage> {
       itemCount: _filteredItems.length,
       separatorBuilder: (_, ___) => SizedBox(height: rs(context, 12)),
       itemBuilder: (context, index) {
-        return _buildGlassCard(context, _filteredItems[index], isList: true);
+        final item = _filteredItems[index];
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ItemViewPage(item: item)),
+            );
+          },
+          child: _itemCard(context, item, isList: true),
+        );
       },
     );
   }
@@ -97,6 +124,19 @@ class _HomePageState extends State<HomePage> {
       _allItems.sort(compare);
       _filteredItems.sort(compare);
     });
+  }
+
+  Widget _itemCard(BuildContext context, TempItem item, {bool isList = false}) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => ItemViewPage(item: item)),
+        );
+      },
+      child: _buildGlassCard(context, item, isList: isList),
+    );
   }
 
   // Sort options
@@ -392,7 +432,7 @@ class _HomePageState extends State<HomePage> {
 
               // toggle view
               _actionButton(
-                icon: _isGrid ? Icons.view_list : Icons.grid_view,
+                icon: _isGrid ? Icons.grid_view : Icons.view_list,
                 onTap: () {
                   setState(() {
                     _isGrid = !_isGrid;
@@ -437,6 +477,14 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+}
+
+void _showAddItemModal(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    builder: (_) => const AddItemModal(),
+  );
 }
 
 // reusable icon button template
@@ -538,9 +586,11 @@ Widget _buildGlassCard(
                       SizedBox(height: rs(context, 30)),
                       Text(
                         item.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: rs(context, 14),
+                          fontSize: rs(context, 15),
                         ),
                       ),
                       SizedBox(height: rs(context, 5)),
@@ -553,6 +603,8 @@ Widget _buildGlassCard(
                       SizedBox(height: rs(context, 30)),
                       Text(
                         "₱${item.price.toStringAsFixed(0)}",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: rs(context, 13),
                           fontWeight: FontWeight.w600,
@@ -562,6 +614,8 @@ Widget _buildGlassCard(
                       SizedBox(height: rs(context, 5)),
                       Text(
                         "Qty: ${item.quantity}",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontSize: rs(context, 13)),
                       ),
                     ],
@@ -570,50 +624,70 @@ Widget _buildGlassCard(
               )
             :
               // grid view
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: _previewImage(
-                      context,
-                      imagePath: "lib/assets/images/popcom logo.png",
+              SizedBox(
+                height: rs(context, 56),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _previewImage(
+                        context,
+                        imagePath: "lib/assets/images/popcom logo.png",
+                      ),
                     ),
-                  ),
-                  SizedBox(height: rs(context, 8)),
-                  Row(
-                    children: [
-                      Text(
-                        item.name,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: rs(context, 15),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: rs(context, 15),
+                            ),
+                          ),
                         ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        "₱${item.price.toStringAsFixed(0)}",
-                        style: TextStyle(
-                          fontSize: rs(context, 13),
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFFDC143C),
+                        SizedBox(width: rs(context, 6)),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: rs(context, 60),
+                          ),
+                          child: Text(
+                            "₱${item.price.toStringAsFixed(0)}",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontSize: rs(context, 13),
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFFDC143C),
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: rs(context, 5)),
-                  Row(
-                    children: [
-                      _skuBadge(context, item.sku),
-                      const Spacer(),
-                      Text(
-                        "Qty: ${item.quantity}",
-                        style: TextStyle(fontSize: rs(context, 13)),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: rs(context, 5)),
-                ],
+                      ],
+                    ),
+                    SizedBox(height: rs(context, 4)),
+                    Row(
+                      children: [
+                        _skuBadge(context, item.sku),
+                        const Spacer(),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: rs(context, 50),
+                          ),
+                          child: Text(
+                            "Qty: ${item.quantity}",
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(fontSize: rs(context, 13)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
       ),
     ),
@@ -656,6 +730,8 @@ Widget _skuBadge(BuildContext context, String sku) {
     ),
     child: Text(
       sku,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
       style: TextStyle(
         fontSize: rs(context, 11),
         fontWeight: FontWeight.bold,
@@ -735,361 +811,6 @@ void _showImagePreview(BuildContext context, String imagePath) {
                       : Image.asset(imagePath, fit: BoxFit.contain),
                 ),
               ),
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}
-
-void _showAddItemModal(BuildContext context) {
-  showDialog(
-    context: context,
-    barrierDismissible: true,
-    builder: (context) {
-      return Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: EdgeInsets.symmetric(
-          horizontal: rs(context, 16),
-          vertical: rs(context, 24),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-            child: Container(
-              padding: EdgeInsets.all(rs(context, 16)),
-              decoration: BoxDecoration(
-                color: Color(0xFFDC143C).withOpacity(0.9),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withOpacity(0.6)),
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _modalHeader(context),
-                    SizedBox(height: rs(context, 12)),
-
-                    _labeledField(
-                      context: context,
-                      label: "Item Name",
-
-                      child: _modalInput(context, "Enter Item Name"),
-                    ),
-                    _labeledField(
-                      context: context,
-                      label: "Manufacturer",
-                      child: _manufacturerDropdown(context, "Manufacturer"),
-                    ),
-                    _labeledField(
-                      context: context,
-                      label: "Intellectual Property",
-                      child: _ipDropdown(context, "Intellectual Property"),
-                    ),
-
-                    _labeledField(
-                      context: context,
-                      label: "Item Description",
-                      child: _modalTextArea(context, "Item Description"),
-                    ),
-
-                    _labeledField(
-                      context: context,
-                      label: "Image URL",
-                      child: _modalInput(context, "Image URL"),
-                    ),
-
-                    _labeledField(
-                      context: context,
-                      label: "Image File",
-                      child: _uploadButton(context),
-                    ),
-
-                    SizedBox(height: rs(context, 12)),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _modalInput(
-                            context,
-                            "Quantity",
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-                        SizedBox(width: rs(context, 5)),
-                        Expanded(
-                          child: _modalInput(
-                            context,
-                            "Price",
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: rs(context, 12)),
-
-                    Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            _cancelModalButton(
-                              onTap: () => Navigator.pop(context),
-                            ),
-                            SizedBox(width: rs(context, 10)),
-                            _saveModalButton(
-                              onTap: () {
-                                print("Save pressed");
-                              },
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: rs(context, 16)),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}
-
-Widget _modalHeader(BuildContext context) {
-  return Text(
-    "Add New Item",
-    style: TextStyle(
-      fontSize: rs(context, 18),
-      fontWeight: FontWeight.w500,
-      color: Colors.white.withAlpha(240),
-    ),
-  );
-}
-
-Widget _modalInput(
-  BuildContext context,
-  String hint, {
-  TextInputType keyboardType = TextInputType.text,
-}) {
-  return Padding(
-    padding: EdgeInsets.only(bottom: rs(context, 12)),
-    child: SizedBox(
-      height: rs(context, 38),
-      child: TextField(
-        keyboardType: keyboardType,
-        decoration: InputDecoration(
-          contentPadding: EdgeInsetsDirectional.all(rs(context, 8)),
-          hintText: hint,
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.yellow.shade700, width: 2),
-          ),
-        ),
-        style: TextStyle(fontSize: rs(context, 13)),
-      ),
-    ),
-  );
-}
-
-Widget _labeledField({
-  required BuildContext context,
-  required String label,
-  required Widget child,
-}) {
-  return Padding(
-    padding: EdgeInsets.only(bottom: rs(context, 12), top: rs(context, 8)),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: rs(context, 12),
-            fontWeight: FontWeight.w500,
-            color: Colors.white.withOpacity(0.9),
-          ),
-        ),
-        SizedBox(height: rs(context, 6)),
-        child,
-      ],
-    ),
-  );
-}
-
-Widget _manufacturerDropdown(BuildContext context, String hint) {
-  return Padding(
-    padding: EdgeInsets.only(bottom: rs(context, 12)),
-    child: SizedBox(
-      height: rs(context, _modalInputHeight),
-      child: DropdownButtonFormField<String>(
-        decoration: InputDecoration(
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: rs(context, 8),
-            vertical: rs(context, 10),
-          ),
-          hintText: hint,
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        style: TextStyle(fontSize: rs(context, 13), color: Colors.black),
-        items: const [
-          DropdownMenuItem(value: "Option 1", child: Text("Option 1")),
-          DropdownMenuItem(value: "Option 2", child: Text("Option 2")),
-        ],
-        onChanged: (value) {},
-      ),
-    ),
-  );
-}
-
-Widget _ipDropdown(BuildContext context, String hint) {
-  return Padding(
-    padding: EdgeInsets.only(bottom: rs(context, 12)),
-    child: SizedBox(
-      height: rs(context, _modalInputHeight),
-      child: DropdownButtonFormField<String>(
-        decoration: InputDecoration(
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: rs(context, 8),
-            vertical: rs(context, 10),
-          ),
-          hintText: hint,
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        style: TextStyle(fontSize: rs(context, 13), color: Colors.black),
-        items: const [
-          DropdownMenuItem(value: "Option 1", child: Text("Option 1")),
-          DropdownMenuItem(value: "Option 2", child: Text("Option 2")),
-        ],
-        onChanged: (value) {},
-      ),
-    ),
-  );
-}
-
-Widget _modalTextArea(BuildContext context, String hint) {
-  return Padding(
-    padding: EdgeInsets.only(bottom: rs(context, 12)),
-    child: TextField(
-      maxLines: 4,
-      decoration: InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-      style: TextStyle(fontSize: rs(context, 13)),
-    ),
-  );
-}
-
-Widget _uploadButton(BuildContext context) {
-  return Padding(
-    padding: EdgeInsets.only(bottom: rs(context, 12)),
-    child: Center(
-      child: OutlinedButton.icon(
-        onPressed: () {},
-        icon: const Icon(Icons.upload),
-        label: const Text("Upload Image"),
-        style: OutlinedButton.styleFrom(
-          minimumSize: Size(rs(context, 150), rs(context, 38)),
-
-          side: BorderSide(color: Colors.white, width: 1.5),
-
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          foregroundColor: Colors.white,
-          textStyle: TextStyle(
-            fontSize: rs(context, 11),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-Widget _cancelModalButton({required VoidCallback onTap}) {
-  return Builder(
-    builder: (context) {
-      return Container(
-        height: rs(context, 35),
-        decoration: BoxDecoration(
-          color: Colors.redAccent.withOpacity(0.85),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.black87),
-          boxShadow: const [
-            BoxShadow(color: Colors.black, offset: Offset(0, 4)),
-          ],
-        ),
-        child: ElevatedButton(
-          onPressed: onTap,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0x00ff4b33).withOpacity(0.85),
-            foregroundColor: Colors.white,
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: const BorderSide(color: Colors.black87),
-            ),
-            padding: EdgeInsets.symmetric(horizontal: rs(context, 18)),
-          ),
-          child: Text(
-            "Cancel",
-            style: TextStyle(
-              fontSize: rs(context, 13),
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}
-
-Widget _saveModalButton({required VoidCallback onTap}) {
-  return Builder(
-    builder: (context) {
-      return Container(
-        height: rs(context, 35),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFDC62D).withOpacity(0.85),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.black87),
-          boxShadow: const [
-            BoxShadow(color: Colors.black, offset: Offset(0, 4)),
-          ],
-        ),
-        child: ElevatedButton(
-          onPressed: onTap,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFFDC62D).withOpacity(0.85),
-            foregroundColor: Colors.black87,
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: const BorderSide(color: Colors.black87),
-            ),
-            padding: EdgeInsets.symmetric(horizontal: rs(context, 18)),
-          ),
-          child: Text(
-            "Save",
-            style: TextStyle(
-              fontSize: rs(context, 13),
-              fontWeight: FontWeight.bold,
             ),
           ),
         ),
