@@ -754,73 +754,29 @@ Widget _previewImage(
 }) {
   final isNetwork = imagePath.startsWith('http');
 
-  return GestureDetector(
-    onTap: () => _showImagePreview(context, imagePath),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.4),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: isNetwork
-            ? Image.network(
-                imagePath,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) return child;
-                  return const Center(child: CircularProgressIndicator());
-                },
-                errorBuilder: (_, __, ___) =>
-                    const Icon(Icons.broken_image, size: 32),
-              )
-            : Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
-                    const Icon(Icons.broken_image, size: 32),
-              ),
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(12),
+    child: Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.4),
+        borderRadius: BorderRadius.circular(12),
       ),
-    ),
-  );
-}
-
-void _showImagePreview(BuildContext context, String imagePath) {
-  final isNetwork = imagePath.startsWith('http');
-
-  showDialog(
-    context: context,
-    barrierDismissible: true,
-    builder: (_) {
-      return Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: EdgeInsets.all(rs(context, 16)),
-        child: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.85),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: InteractiveViewer(
-                  minScale: 0.8,
-                  maxScale: 4,
-                  child: isNetwork
-                      ? Image.network(imagePath, fit: BoxFit.contain)
-                      : Image.asset(imagePath, fit: BoxFit.contain),
-                ),
-              ),
+      child: isNetwork
+          ? Image.network(
+              imagePath,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) =>
+                  const Icon(Icons.broken_image, size: 32),
+            )
+          : Image.asset(
+              imagePath,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) =>
+                  const Icon(Icons.broken_image, size: 32),
             ),
-          ),
-        ),
-      );
-    },
+    ),
   );
 }
 

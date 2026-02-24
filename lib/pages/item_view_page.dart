@@ -63,22 +63,29 @@ class ItemViewPage extends StatelessWidget {
             padding: EdgeInsets.all(rs(context, 16)),
             child: _glassContainer(
               context,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _itemSummary(context, item),
-                  SizedBox(height: rs(context, 16)),
-                  Text(
-                    "TRANSACTION HISTORY (SALES)",
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold,
-                      fontSize: rs(context, 14),
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _itemSummary(context, item),
+
+                    SizedBox(height: rs(context, 16)),
+
+                    Text(
+                      "TRANSACTION HISTORY (SALES)",
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.bold,
+                        fontSize: rs(context, 14),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: rs(context, 10)),
-                  Expanded(child: _transactionHistoryTable(context, item)),
-                ],
+
+                    SizedBox(height: rs(context, 10)),
+
+                    _transactionHistoryTable(context, item),
+                  ],
+                ),
               ),
             ),
           ),
@@ -89,6 +96,49 @@ class ItemViewPage extends StatelessWidget {
 }
 
 Widget _itemSummary(BuildContext context, TempItem item) {
+  void showImagePreview(BuildContext context, String imagePath) {
+    final isNetwork = imagePath.startsWith('http');
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.all(rs(context, 16)),
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: InteractiveViewer(
+                    minScale: 0.8,
+                    maxScale: 4,
+                    child: isNetwork
+                        ? Image.network(imagePath, fit: BoxFit.contain)
+                        : Image.asset(imagePath, fit: BoxFit.contain),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  final List<String> galleryImages = [
+    'lib/assets/images/popcom logo.png',
+    'lib/assets/images/popcom logo.png',
+    'lib/assets/images/popcom logo.png',
+    'lib/assets/images/popcom logo.png',
+  ];
+
   return ClipRRect(
     borderRadius: BorderRadius.circular(16),
     child: BackdropFilter(
@@ -111,28 +161,32 @@ Widget _itemSummary(BuildContext context, TempItem item) {
             Row(
               children: [
                 // Image container
-                Container(
-                  width: rs(context, 120), // fixed width
-                  height: rs(context, 120), // fixed height
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.black87.withOpacity(0.6),
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 4,
-                        offset: Offset(2, 2),
+                GestureDetector(
+                  onTap: () => showImagePreview(
+                    context,
+                    'lib/assets/images/popcom logo.png',
+                  ),
+                  child: Container(
+                    width: rs(context, 120),
+                    height: rs(context, 120),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.black87.withOpacity(0.6),
+                        width: 1.5,
                       ),
-                    ],
-                    image: DecorationImage(
-                      image: AssetImage(
-                        'lib/assets/images/popcom logo.png',
-                      ), // image path
-                      fit: BoxFit.cover,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 4,
+                          offset: Offset(2, 2),
+                        ),
+                      ],
+                      image: const DecorationImage(
+                        image: AssetImage('lib/assets/images/popcom logo.png'),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
@@ -255,7 +309,70 @@ Widget _itemSummary(BuildContext context, TempItem item) {
                 ),
               ],
             ),
-            SizedBox(height: rs(context, 4)),
+            SizedBox(height: rs(context, 18)),
+
+            Text(
+              "GALLERY",
+              style: TextStyle(
+                fontSize: rs(context, 12),
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+
+            SizedBox(height: rs(context, 8)),
+
+            SizedBox(
+              height: rs(
+                context,
+                90,
+              ), // controls how much vertical space gallery uses
+              child: ShaderMask(
+                shaderCallback: (rect) {
+                  return const LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black,
+                      Colors.black,
+                      Colors.transparent,
+                    ],
+                    stops: [0.0, 0.05, 0.95, 1.0],
+                  ).createShader(rect);
+                },
+                blendMode: BlendMode.dstIn,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: galleryImages.length,
+                  separatorBuilder: (_, __) => SizedBox(width: rs(context, 8)),
+                  itemBuilder: (context, index) {
+                    final imagePath = galleryImages[index];
+
+                    return GestureDetector(
+                      onTap: () => showImagePreview(context, imagePath),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          constraints: BoxConstraints(
+                            minWidth: rs(context, 70),
+                            maxWidth: rs(context, 120),
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.8),
+                            border: Border.all(
+                              color: Colors.black87.withOpacity(0.6),
+                            ),
+                          ),
+                          child: Image.asset(imagePath, fit: BoxFit.cover),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
           ],
         ),
       ),
