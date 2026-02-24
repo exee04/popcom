@@ -209,6 +209,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _filteredItems = _allItems.where((item) {
         final matchesSearch =
+            query.isEmpty ||
             item.name.toLowerCase().contains(query) ||
             item.sku.toLowerCase().contains(query);
 
@@ -240,6 +241,9 @@ class _HomePageState extends State<HomePage> {
         onSelected: (value) {
           setState(() {
             _selectedStatus = value;
+            if (value == null) {
+              _searchController.clear();
+            }
             _applyFilters();
           });
         },
@@ -254,7 +258,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   PopupMenuItem<ItemStatus?> _filterItem(ItemStatus? value, String label) {
-    final isSelected = _selectedStatus == value;
+    final isSelected =
+        (_selectedStatus == null && value == null) || _selectedStatus == value;
 
     return PopupMenuItem<ItemStatus?>(
       value: value,

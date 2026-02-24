@@ -24,17 +24,18 @@ class ItemViewPage extends StatelessWidget {
             onTap: () => Navigator.pop(context),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.red,
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.circular(10),
-                border: Border(
-                  top: BorderSide(color: Colors.black87, width: 1),
-                  left: BorderSide(color: Colors.black87, width: 1),
-                  bottom: BorderSide(color: Colors.black87, width: 4),
-                  right: BorderSide(color: Colors.black87, width: 1),
-                ),
+                color: Colors.red.withOpacity(0.85),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.black87),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black, offset: Offset(0, 4)),
+                ],
               ),
-              child: Icon(Icons.arrow_back, color: Colors.yellow.shade500, size: 20),
+              child: Icon(
+                Icons.arrow_back,
+                color: Colors.yellow.shade500,
+                size: 20,
+              ),
             ),
           ),
         ),
@@ -129,8 +130,8 @@ Widget _itemSummary(BuildContext context, TempItem item) {
                     ],
                     image: DecorationImage(
                       image: AssetImage(
-                        'assets/images/item.png',
-                      ), // your image path
+                        'lib/assets/images/popcom logo.png',
+                      ), // image path
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -172,12 +173,14 @@ Widget _itemSummary(BuildContext context, TempItem item) {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border(
-                        top: BorderSide(color: Colors.black87, width: 1),
-                        left: BorderSide(color: Colors.black87, width: 1),
-                        bottom: BorderSide(color: Colors.black87, width: 3),
-                        right: BorderSide(color: Colors.black87, width: 3),
-                      ),
+                      border: Border.all(color: Colors.black87),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black,
+                          offset: Offset(1, 1),
+                          spreadRadius: 1,
+                        ),
+                      ],
                     ),
                     padding: EdgeInsets.symmetric(
                       vertical: rs(context, 5),
@@ -213,12 +216,14 @@ Widget _itemSummary(BuildContext context, TempItem item) {
                     decoration: BoxDecoration(
                       color: Color(0xFFFDC62D),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border(
-                        top: BorderSide(color: Colors.black87, width: 1),
-                        left: BorderSide(color: Colors.black87, width: 1),
-                        bottom: BorderSide(color: Colors.black87, width: 3),
-                        right: BorderSide(color: Colors.black87, width: 3),
-                      ),
+                      border: Border.all(color: Colors.black87),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black,
+                          offset: Offset(1, 1),
+                          spreadRadius: 1,
+                        ),
+                      ],
                     ),
                     padding: EdgeInsets.symmetric(
                       vertical: rs(context, 5),

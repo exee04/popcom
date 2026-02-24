@@ -1,3 +1,4 @@
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:popcom/models/item.dart';
 
@@ -110,8 +111,6 @@ class ItemService {
     required String ipId,
     required String shelfId,
     required String description,
-    required String thumbnailLink,
-    required String imageFolderLink,
   }) async {
     final user = _supabase.auth.currentUser;
 
@@ -131,12 +130,62 @@ class ItemService {
           'shelf_id': shelfId,
           'description': description,
           'seller_id': user.id,
-          'thumbnail_img_link': thumbnailLink,
-          'image_folder_link': imageFolderLink,
         })
         .select()
         .single();
 
     return result;
+  }
+
+  Future<String> uploadThumbnail({
+    required XFile image,
+    required String renterId,
+    required String sku,
+  }) async {
+    final fileBytes = await image.readAsBytes();
+
+    final path = "$renterId/$sku/thumbnail.jpg";
+
+    await _supabase.storage.from('item_images').uploadBinary(path, fileBytes);
+
+    final publicUrl = _supabase.storage.from('item_images').getPublicUrl(path);
+
+    return publicUrl;
+  }
+
+  Future<String> uploadItemImages({
+    required List<XFile> images,
+    required String renterId,
+    required String sku,
+  }) async {
+    final folderPath = "$renterId/$sku/images";
+
+    for (final image in images) {
+      final fileBytes = await image.readAsBytes();
+      final fileName = "${DateTime.now().millisecondsSinceEpoch}.jpg";
+
+      await _supabase.storage
+          .from('item_images')
+          .uploadBinary("$folderPath/$fileName", fileBytes);
+    }
+
+    return folderPath; // we store folder, not URLs
+  }
+
+  Future<void> updateItemImages({
+    required String sku,
+    required String thumbnailUrl,
+    required String imageFolderPath,
+  }) async {
+    final updated = await _supabase
+        .from('Item')
+        .update({
+          'thumbnail_img_link': thumbnailUrl,
+          'image_folder_link': imageFolderPath,
+        })
+        .eq('sku', sku)
+        .select();
+
+    print("Updated result: $updated");
   }
 }
