@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:popcom/models/item.dart';
@@ -11,8 +12,6 @@ double rs(BuildContext context, double size) {
   return size * (width / 375).clamp(0.9, 1.2);
 }
 
-enum ItemStatus { approved, pending, pulledOut }
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
   @override
@@ -23,18 +22,35 @@ class _HomePageState extends State<HomePage> {
   final _supabase = Supabase.instance.client;
   final _searchController = TextEditingController();
   final ItemService _itemService = ItemService();
-  late Future<List<Item>> _itemsFuture;
+  List<Item> _items = [];
+  bool _isLoading = true;
+  Timer? _debounce;
 
   ItemStatus? _selectedStatus; // For filtering, null = All
-
   bool _isGrid = true;
+  String _sortField = 'date_added'; // default sort field
+  bool _ascending = false; // default sort is ascending
 
-  String _sortField = 'price'; // default sort field
-  bool _ascending = true; // default sort is ascending
+  Future<void> _loadItems() async {
+    setState(() => _isLoading = true);
 
-  // temp list for testing sort function and search function via hardcoded values
-  late List<TempItem> _allItems;
-  List<TempItem> _filteredItems = [];
+    try {
+      final items = await _itemService.fetchItems(
+        search: _searchController.text,
+        status: _selectedStatus,
+        sortField: _sortField,
+        ascending: _ascending,
+      );
+
+      setState(() {
+        _items = items;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print("Error loading items: $e");
+      setState(() => _isLoading = false);
+    }
+  }
 
   // grid view widget
   Widget _buildGridView(BuildContext context) {
@@ -49,7 +65,7 @@ class _HomePageState extends State<HomePage> {
             top: rs(context, 20),
             bottom: rs(context, 5),
           ),
-          itemCount: _filteredItems.length,
+          itemCount: _items.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: rs(context, 12),
@@ -57,7 +73,7 @@ class _HomePageState extends State<HomePage> {
             childAspectRatio: crossAxisCount == 2 ? 0.72 : 0.62,
           ),
           itemBuilder: (context, index) {
-            final item = _filteredItems[index];
+            final item = _items[index];
             return GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -77,10 +93,10 @@ class _HomePageState extends State<HomePage> {
   Widget _buildListView(BuildContext context) {
     return ListView.separated(
       padding: EdgeInsets.only(top: rs(context, 20), bottom: rs(context, 5)),
-      itemCount: _filteredItems.length,
+      itemCount: _items.length,
       separatorBuilder: (_, ___) => SizedBox(height: rs(context, 12)),
       itemBuilder: (context, index) {
-        final item = _filteredItems[index];
+        final item = _items[index];
         return GestureDetector(
           onTap: () {
             Navigator.push(
@@ -95,38 +111,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   // temp sort function
-  void _sortItems(String field, bool ascending) {
+  void _changeSort(String field, bool ascending) {
     setState(() {
       _sortField = field;
       _ascending = ascending;
-
-      int compare(TempItem a, TempItem b) {
-        switch (field) {
-          case 'name':
-            return ascending
-                ? a.name.compareTo(b.name)
-                : b.name.compareTo(a.name);
-          case 'sku':
-            return ascending ? a.sku.compareTo(b.sku) : b.sku.compareTo(a.sku);
-          case 'price':
-            return ascending
-                ? a.price.compareTo(b.price)
-                : b.price.compareTo(a.price);
-          case 'quantity':
-            return ascending
-                ? a.quantity.compareTo(b.quantity)
-                : b.quantity.compareTo(a.quantity);
-          default:
-            return 0;
-        }
-      }
-
-      _allItems.sort(compare);
-      _filteredItems.sort(compare);
     });
+    _loadItems();
   }
 
-  Widget _itemCard(BuildContext context, TempItem item, {bool isList = false}) {
+  Widget _itemCard(BuildContext context, Item item, {bool isList = false}) {
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: () {
@@ -156,15 +149,15 @@ class _HomePageState extends State<HomePage> {
         icon: Icon(icon, color: Colors.black87, size: rs(context, 18)),
         onSelected: (value) {
           final parts = value.split('_');
-          _sortItems(parts[0], parts[1] == 'asc');
+          _changeSort(parts[0], parts[1] == 'asc');
         },
         itemBuilder: (_) => [
           _sortItem("name", true, "Item Name (Asc)"),
           _sortItem("name", false, "Item Name (Desc)"),
           _sortItem("sku", true, "SKU (Asc)"),
           _sortItem("sku", false, "SKU (Desc)"),
-          _sortItem("price", true, "Price (Asc)"),
-          _sortItem("price", false, "Price (Desc)"),
+          _sortItem("store_price", true, "Price (Asc)"),
+          _sortItem("store_price", false, "Price (Desc)"),
           _sortItem("quantity", true, "Quantity (Asc)"),
           _sortItem("quantity", false, "Quantity (Desc)"),
         ],
@@ -202,25 +195,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // filter and search function
-  void _applyFilters() {
-    final query = _searchController.text.toLowerCase();
-
-    setState(() {
-      _filteredItems = _allItems.where((item) {
-        final matchesSearch =
-            query.isEmpty ||
-            item.name.toLowerCase().contains(query) ||
-            item.sku.toLowerCase().contains(query);
-
-        final matchesStatus =
-            _selectedStatus == null || item.status == _selectedStatus;
-
-        return matchesSearch && matchesStatus;
-      }).toList();
-    });
-  }
-
   // Filter options
   Widget _statusFilterDropdown(BuildContext context) {
     return Container(
@@ -244,7 +218,7 @@ class _HomePageState extends State<HomePage> {
             if (value == null) {
               _searchController.clear();
             }
-            _applyFilters();
+            _loadItems();
           });
         },
         itemBuilder: (_) => [
@@ -291,78 +265,23 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _itemsFuture = _itemService.fetchItems(); // async
-    _itemsFuture = _supabase
-        .from('Item') // lowercase table name
-        .select(
-          '*, category:Categories(category_name)',
-        ) // lowercase table and relationship
-        .then((response) {
-          final data = response as List<dynamic>;
-          return data
-              .map((e) => Item.fromMap(e as Map<String, dynamic>))
-              .toList();
-        });
-    _itemsFuture
-        .then((items) {
-          print("Fetched ${items.length} items:");
-          for (var item in items) {
-            print(item); // This will call the toString method of Item
-          }
-        })
-        .catchError((error) {
-          print("Error fetching items: $error");
-        });
-    print(
-      "Fetched items: $_itemsFuture",
-    ); // Debug print to check if items are fetched correctly
-    print("Successfully initialized HomePage with items future: $_itemsFuture");
-
-    // for search, sort, and filter function
-    _allItems = [
-      TempItem(
-        name: "Item A",
-        sku: "SKU-001",
-        price: 1200,
-        quantity: 10,
-        status: ItemStatus.approved,
-      ),
-      TempItem(
-        name: "Item C",
-        sku: "SKU-003",
-        price: 800,
-        quantity: 5,
-        status: ItemStatus.pending,
-      ),
-      TempItem(
-        name: "Item B",
-        sku: "SKU-002",
-        price: 1500,
-        quantity: 20,
-        status: ItemStatus.pulledOut,
-      ),
-      TempItem(
-        name: "Item D",
-        sku: "SKU-004",
-        price: 500,
-        quantity: 15,
-        status: ItemStatus.approved,
-      ),
-    ];
-
-    _filteredItems = List.from(_allItems);
-
+    _loadItems();
     _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
   void _onSearchChanged() {
-    _applyFilters();
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      _loadItems();
+    });
   }
 
   @override
@@ -472,9 +391,11 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             child: glassPanel(
               context,
-              child: _isGrid
-                  ? _buildGridView(context)
-                  : _buildListView(context),
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : (_isGrid
+                        ? _buildGridView(context)
+                        : _buildListView(context)),
             ),
           ),
           SizedBox(height: rs(context, 16)),
@@ -556,11 +477,7 @@ Widget _textButton({required String label, required VoidCallback onTap}) {
 }
 
 // Cards for items displayed
-Widget _buildGlassCard(
-  BuildContext context,
-  TempItem item, {
-  bool isList = false,
-}) {
+Widget _buildGlassCard(BuildContext context, Item item, {bool isList = false}) {
   return ClipRRect(
     borderRadius: BorderRadius.circular(16),
     child: BackdropFilter(
@@ -580,7 +497,9 @@ Widget _buildGlassCard(
                 children: [
                   _previewImage(
                     context,
-                    imagePath: "lib/assets/images/popcom logo.png",
+                    imagePath:
+                        item.thumbnailImgLink ??
+                        "lib/assets/images/popcom logo.png",
                     width: rs(context, 80),
                     height: rs(context, 80),
                   ),
@@ -607,7 +526,7 @@ Widget _buildGlassCard(
                     children: [
                       SizedBox(height: rs(context, 30)),
                       Text(
-                        "₱${item.price.toStringAsFixed(0)}",
+                        "₱${item.storePrice.toStringAsFixed(0)}",
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -637,7 +556,9 @@ Widget _buildGlassCard(
                     Expanded(
                       child: _previewImage(
                         context,
-                        imagePath: "lib/assets/images/popcom logo.png",
+                        imagePath:
+                            item.thumbnailImgLink ??
+                            "lib/assets/images/popcom logo.png",
                       ),
                     ),
                     Row(
@@ -659,7 +580,7 @@ Widget _buildGlassCard(
                             maxWidth: rs(context, 60),
                           ),
                           child: Text(
-                            "₱${item.price.toStringAsFixed(0)}",
+                            "₱${item.storePrice.toStringAsFixed(0)}",
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.right,
@@ -778,21 +699,4 @@ Widget _previewImage(
             ),
     ),
   );
-}
-
-// class for testing sort function via hardcoded values
-class TempItem {
-  final String name;
-  final String sku;
-  final double price;
-  final int quantity;
-  final ItemStatus status;
-
-  TempItem({
-    required this.name,
-    required this.sku,
-    required this.price,
-    required this.quantity,
-    required this.status,
-  });
 }

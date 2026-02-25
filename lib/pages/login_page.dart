@@ -82,7 +82,6 @@ class _LoginPageState extends State<LoginPage>
       return;
     }
     setState(() => _loading = true);
-
     try {
       // attempt sign up
       if (_isSignUp) {
@@ -97,7 +96,7 @@ class _LoginPageState extends State<LoginPage>
       }
       // attempt sign in
       else {
-        await authService.signInWithUsernamePassword(username, password);
+        await authService.signInWithUsernamePassword(email, password);
         _showSnack("Successfully logged in.");
       }
     } catch (e) {

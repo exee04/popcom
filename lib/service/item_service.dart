@@ -6,19 +6,65 @@ class ItemService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
   /// Fetch ALL items (temporary)
-  Future<List<Item>> fetchItems() async {
-    final data = await _supabase.from('Item').select('''
-          *,
-          category:Categories(category_name),
-          manufacturer:Manufacturer(name),
-          shelf:Shelf(shelf_num),
-          ip:Intellectual_Property(ip_name)
-        ''');
+  Future<List<Item>> fetchItems({
+    String? search,
+    ItemStatus? status,
+    String sortField = 'date_added',
+    bool ascending = false,
+  }) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) throw Exception("User not authenticated");
 
-    print("FETCH ITEMS RAW:");
-    print(data);
+    var query = _supabase
+        .from('Item')
+        .select('''
+        *,
+        category:Categories(category_name),
+        manufacturer:Manufacturer(name),
+        shelf:Shelf(shelf_num),
+        ip:Intellectual_Property(ip_name)
+      ''')
+        .eq('seller_id', user.id);
 
-    return (data as List).map<Item>((item) => Item.fromMap(item)).toList();
+    /// SEARCH
+    if (search != null && search.isNotEmpty) {
+      query = query.or('name.ilike.%$search%,sku.ilike.%$search%');
+    }
+
+    /// STATUS FILTER
+    if (status != null) {
+      switch (status) {
+        case ItemStatus.approved:
+          query = query.eq('is_approved', true).eq('is_pulled_out', false);
+          break;
+
+        case ItemStatus.pending:
+          query = query.eq('is_approved', false).eq('is_pulled_out', false);
+          break;
+
+        case ItemStatus.pulledOut:
+          query = query.eq('is_pulled_out', true);
+          break;
+      }
+    }
+
+    /// SORT WHITELIST
+    const allowedSortFields = [
+      'name',
+      'sku',
+      'store_price',
+      'quantity',
+      'date_added',
+      'units_sold',
+    ];
+
+    if (!allowedSortFields.contains(sortField)) {
+      sortField = 'date_added';
+    }
+
+    final data = await query.order(sortField, ascending: ascending);
+
+    return (data as List).map((e) => Item.fromMap(e)).toList();
   }
 
   /// CATEGORY OPTIONS
@@ -187,5 +233,29 @@ class ItemService {
         .select();
 
     print("Updated result: $updated");
+  }
+
+  Future<List<String>> fetchItemGallery(String folderPath) async {
+    if (folderPath.isEmpty) return [];
+
+    // remove trailing slash if exists
+    folderPath = folderPath.endsWith('/')
+        ? folderPath.substring(0, folderPath.length - 1)
+        : folderPath;
+
+    print("Listing storage folder: $folderPath");
+
+    final files = await _supabase.storage
+        .from('item_images')
+        .list(path: folderPath);
+
+    print("Files returned: $files");
+
+    final urls = files.map((file) {
+      final fullPath = "$folderPath/${file.name}";
+      return _supabase.storage.from('item_images').getPublicUrl(fullPath);
+    }).toList();
+
+    return urls;
   }
 }

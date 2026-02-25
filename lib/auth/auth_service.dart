@@ -9,19 +9,22 @@ class AuthService {
     String username,
     String password,
   ) async {
-    final email =
-        await _supabase.rpc(
-              'get_email_by_username',
-              params: {'input_username': username},
-            )
-            as String?;
+    final result = await _supabase.rpc(
+      'get_email_by_username',
+      params: {'input_username': username},
+    );
 
-    if (email == null || email.isEmpty) {
+    final email = result is String
+        ? result
+        : (result is List && result.isNotEmpty ? result.first : null);
+
+    if (email == null || email.toString().isEmpty) {
       throw Exception('User not found');
     }
-
+    print(username);
+    print("Found email: $email");
     return await _supabase.auth.signInWithPassword(
-      email: email,
+      email: email.toString(),
       password: password,
     );
   }

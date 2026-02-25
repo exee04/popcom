@@ -1,3 +1,5 @@
+enum ItemStatus { approved, pending, pulledOut }
+
 class Item {
   final String sku;
   final String name;
